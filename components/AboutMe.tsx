@@ -52,13 +52,16 @@ const AboutMe = () => {
 
           {/* Timeline Section */}
           <div className="space-y-4">
-            {experiences.map((experience, index) => (
-              <TimelineItem 
-                key={experience.id}
-                item={experience}
-                isLast={index === experiences.length - 1}
-              />
-            ))}
+            <ul className="timeline timeline-vertical">
+              {experiences.map((experience, index) => (
+                <TimelineItem 
+                  key={experience.id}
+                  item={experience}
+                  isLast={index === experiences.length - 1}
+                  index={index}
+                />
+              ))}
+            </ul>
           </div>
         </div>
       </div>

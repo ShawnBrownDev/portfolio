@@ -22,7 +22,6 @@ const Navbar = () => {
     { href: '#about', label: 'About' },
     { href: '#projects', label: 'Projects' },
     { href: '#skills', label: 'Skills' },
-    { href: '#blog', label: 'Blog' },
     { href: '#contact', label: 'Contact' },
   ];
 
@@ -35,7 +34,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex justify-between items-center px-4 md:px-6">
         <Link href="/" className="text-2xl font-bold text-white">
-          JD
+          Shawn Brown
         </Link>
 
         {/* Desktop Navigation */}

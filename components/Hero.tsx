@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { ArrowDown } from 'lucide-react';
 import Link from 'next/link';
-import Globe from './Globe';
+import GitHubContributionsTerminal from './GitHubContributionsTerminal';
 
 const Hero = () => {
   return (
@@ -11,9 +11,9 @@ const Hero = () => {
       <div className="container mx-auto px-4 md:px-6 py-10 flex flex-col md:flex-row items-center">
         <div className="flex-1 md:pr-8 space-y-6 mb-10 md:mb-0">
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-            Hi, I'm
+            Hi, I&apos;m
             <br />
-            <span className="text-white">John Doe</span>
+            <span className="text-white">Shawn Brown</span>
           </h1>
 
           <p className="text-xl text-gray-300 max-w-xl">
@@ -27,9 +27,6 @@ const Hero = () => {
             <span className="inline-block bg-gray-800 px-3 py-1 text-sm rounded-full text-gray-200">
               System Architect
             </span>
-            <span className="inline-block bg-gray-800 px-3 py-1 text-sm rounded-full text-gray-200">
-              OSS Contributor
-            </span>
           </div>
 
           <div className="flex flex-wrap gap-4 pt-2">
@@ -40,19 +37,19 @@ const Hero = () => {
               View Projects
             </Link>
             <a
-              href="/resume.pdf"
+              href="https://www.upwork.com/freelancers/~01b65a6b74d7c3917b?viewMode=1"
               target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-transparent px-6 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              download
             >
-              Download Resume
+              UpWork
             </a>
           </div>
         </div>
 
         <div className="flex-1 relative">
-          <div className="w-full h-96 md:h-[500px] relative">
-            <Globe />
+          <div className="w-full h-96 md:h-[500px] relative flex items-center justify-center">
+            <GitHubContributionsTerminal username="ShawnBrownDev" />
           </div>
         </div>
       </div>

@@ -1,77 +1,68 @@
 "use client";
 
-import { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sphere } from '@react-three/drei';
+import { Points, PointMaterial, Sphere, Stars } from '@react-three/drei';
 import * as THREE from 'three';
+import { useRef } from 'react';
 
-function GlobeMesh() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.002;
-    }
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
-    }
-  });
-
-  const vertexShader = `
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float uTime;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    
-    void main() {
-      float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-      vec3 color = vec3(0.1, 0.3, 0.9);
-      gl_FragColor = vec4(color * intensity, 1.0);
-    }
-  `;
-
+export default function GlowingGlobe() {
   return (
-    <Sphere args={[1, 64, 64]} ref={meshRef}>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={{
-          uTime: { value: 0 },
-        }}
-        transparent
-        side={THREE.FrontSide}
-      />
+    <div className="w-full h-full">
+      <Canvas camera={{ position: [0, 0, 3], fov: 75 }}>
+        <ambientLight intensity={0.3} />
+        <pointLight position={[10, 10, 10]} />
+        <Stars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
+        <BaseGlobe />
+        <GlowingPoints />
+      </Canvas>
+    </div>
+  );
+}
+
+// Base solid/transparent sphere
+function BaseGlobe() {
+  return (
+    <Sphere args={[1, 64, 64]}>
+      {/* Using a Standard material for better lighting interaction */}
+      <meshStandardMaterial color="#1a202c" transparent opacity={0.5} roughness={0.7} metalness={0.2} />
     </Sphere>
   );
 }
 
-export default function Globe() {
+// Glowing points on the sphere's surface
+function GlowingPoints() {
+  const ref = useRef<any>();
+  // Generate points directly on the sphere's surface
+  const points = Array.from({ length: 2000 }, () => {
+    const r = 1; // Sphere radius
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(Math.random() * 2 - 1);
+    return new THREE.Vector3(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.sin(phi) * Math.sin(theta),
+      r * Math.cos(phi)
+    );
+  }).reduce((acc, v) => acc.concat(v.toArray()), [] as number[]);
+
+  const float32Points = new Float32Array(points);
+
+  // No separate rotation here, points rotate with the base sphere
+  // useFrame(() => {
+  //   if (ref.current) {
+  //     ref.current.rotation.y += 0.0015
+  //   }
+  // })
+
   return (
-    <div className="w-full h-full">
-      <Canvas
-        camera={{
-          position: [0, 0, 3],
-          fov: 45,
-          near: 0.1,
-          far: 1000,
-        }}
-      >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <GlobeMesh />
-      </Canvas>
-    </div>
+    <Points ref={ref} positions={float32Points} stride={3} frustumCulled>
+      <PointMaterial
+        transparent
+        color="#00ffff"
+        size={0.01}
+        sizeAttenuation
+        depthWrite={false}
+        blending={THREE.AdditiveBlending} // Additive blending for glow effect
+      />
+    </Points>
   );
 }

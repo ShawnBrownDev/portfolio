@@ -17,9 +17,8 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
             <Image 
               src={project.image} 
               alt={project.title}
-              layout="fill"
-              objectFit="cover"
-              className="opacity-90"
+              fill
+              className="opacity-90 object-cover"
             />
           </div>
         </div>
