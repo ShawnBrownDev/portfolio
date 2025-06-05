@@ -93,7 +93,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           ...prev,
           { type: 'output', text: 'Available commands:' },
           { type: 'output', text: '- github: Display GitHub contribution graph' },
-          { type: 'output', text: '- List questions you can add after ask <question>' },
+          { type: 'output', text: '- ask: List questions you can add after ask <question>' },
           { type: 'output', text: '- clear: Clear the terminal output' },
           // Add future game commands here
         ]);
