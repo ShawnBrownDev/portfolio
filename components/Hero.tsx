@@ -48,7 +48,11 @@ const Hero = () => {
         </div>
 
         <div className="flex-1 relative">
-          <div className="w-full h-96 md:h-[500px] relative flex items-center justify-center">
+          <div className="mb-4 text-center md:text-left">
+             <h2 className="text-2xl font-bold mb-2">Interactive Development Log</h2>
+             <p className="text-gray-400">Explore my recent activity and ask me questions directly.</p>
+          </div>
+          <div className="w-full h-96 md:h-[500px] relative flex items-center justify-center border border-gray-700 rounded-lg overflow-hidden">
             <GitHubContributionsTerminal username="ShawnBrownDev" />
           </div>
         </div>

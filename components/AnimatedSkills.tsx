@@ -57,7 +57,9 @@ const AnimatedSkills = () => {
 
   const filteredSkills = selectedCategory === 'all' 
     ? skills 
-    : skills.filter((skill: Skill) => skill.category === selectedCategory);
+    : skills.filter((skill: Skill) => 
+        skill.category.includes(selectedCategory as 'frontend' | 'backend' | 'database' | 'devops')
+      );
 
   return (
     <section className="py-20 bg-gray-900/50">
@@ -116,9 +118,14 @@ const AnimatedSkills = () => {
                   </div>
                   <p className="text-gray-400">{skill.description}</p>
                   <div className="mt-4 flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300">
-                      {skill.category}
-                    </span>
+                    {skill.category.map((cat, index) => (
+                       <span
+                         key={index}
+                         className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white-300"
+                       >
+                         {cat}
+                       </span>
+                    ))}
                   </div>
                 </div>
               </motion.div>
