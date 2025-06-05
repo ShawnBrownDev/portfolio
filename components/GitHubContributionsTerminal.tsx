@@ -29,6 +29,17 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
+  // Add initial message on component mount, only once
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!isInstalled) {
+      // Add both messages in a single update
+      setOutput([
+        { type: 'output', text: 'Welcome to the interactive terminal!' },
+        { type: 'output', text: 'Run `sb install` to get started and unlock commands.' }
+      ]);
+    }
+  }, [isInstalled]); // Add isInstalled to dependency array
 
 
   const simulateInstall = async () => {
@@ -140,6 +151,21 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       case 'echo':
         setOutput(prev => [...prev, { type: 'output', text: args.join(' ') }]);
         break;
+      case 'github': // Handle github command
+        if (contributionData) {
+          setOutput(prev => [...prev, { type: 'output', text: 'Fetching GitHub contributions...' }]);
+          // Render the contribution grid or a summary
+           setOutput(prev => [...prev, { type: 'output', text: renderContributionGrid(contributionData.contributions) }]);
+        } else if (loading) {
+             setOutput(prev => [...prev, { type: 'output', text: 'Already fetching data...' }]);
+        } else {
+             setOutput(prev => [...prev, { type: 'output', text: 'Fetching GitHub contributions for the first time...' }]);
+             const data = await fetchContributions();
+             if (data) {
+                  setOutput(prev => [...prev, { type: 'output', text: renderContributionGrid(data.contributions) }]);
+             }
+        }
+        break; // Added missing break
       case 'ask':
         const question = args.join(' ').trim();
         if (question) {

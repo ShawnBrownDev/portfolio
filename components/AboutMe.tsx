@@ -12,6 +12,12 @@ const AboutMe = () => {
           <div className="space-y-6">
             <p className="text-lg text-gray-300">
               I am a full stack developer with 4 years of experience in designing and building scalable web applications.
+              My approach goes beyond just writing code; I focus on creating robust, efficient, and maintainable solutions
+              that solve real-world problems and provide tangible business value.
+            </p>
+            <p className="text-lg text-gray-300">
+              I am deeply passionate about learning new technologies and continuously improving my skills to stay ahead in the ever-evolving tech landscape.
+              I thrive on tackling complex challenges and am committed to delivering high-quality software that makes a difference.
             </p>
           </div>
           {/* Timeline Section */}
