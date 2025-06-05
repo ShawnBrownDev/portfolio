@@ -5,35 +5,51 @@ import { IconType } from 'react-icons';
 export interface Skill {
   name: string;
   icon: IconType;
+  category: 'frontend' | 'backend' | 'database' | 'devops';
+  description: string;
 }
 
 export const skills: Skill[] = [
   {
-    name: 'JavaScript',
-    icon: FaJs,
-  },
-  {
-    name: 'TypeScript',
-    icon: SiTypescript,
+    name: 'Next.js',
+    icon: SiNextdotjs,
+    category: 'frontend',
+    description: 'Server-side rendering and static site generation',
   },
   {
     name: 'React',
     icon: FaReact,
+    category: 'frontend',
+    description: 'Component-based UI development',
+  },
+  {
+    name: 'TypeScript',
+    icon: SiTypescript,
+    category: 'frontend',
+    description: 'Type-safe JavaScript development',
   },
   {
     name: 'Node.js',
     icon: FaNodeJs,
-  },
-  {
-    name: 'SupaBase',
-    icon: SiSupabase,
+    category: 'backend',
+    description: 'Server-side JavaScript runtime',
   },
   {
     name: 'PostgreSQL',
     icon: SiPostgresql,
+    category: 'database',
+    description: 'Advanced relational database',
   },
   {
-    name: 'Next.js',
-    icon: SiNextdotjs,
+    name: 'Supabase',
+    icon: SiSupabase,
+    category: 'backend',
+    description: 'Open source Firebase alternative',
+  },
+  {
+    name: 'Docker',
+    icon: FaDocker,
+    category: 'devops',
+    description: 'Containerization and deployment',
   },
 ];
