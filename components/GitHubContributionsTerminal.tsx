@@ -92,11 +92,9 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
         setOutput(prev => [
           ...prev,
           { type: 'output', text: 'Available commands:' },
-          { type: 'output', text: '- help: Show this command list' },
           { type: 'output', text: '- github: Display GitHub contribution graph' },
+          { type: 'output', text: '- List questions you can add after ask <question>' },
           { type: 'output', text: '- clear: Clear the terminal output' },
-          { type: 'output', text: '- echo <text>: Echo the provided text' },
-          { type: 'output', text: '- ask <question>: Get an answer to a predefined question' },
           // Add future game commands here
         ]);
         break;
@@ -126,17 +124,22 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           };
 
           const userKeywords = extractKeywords(question); // Extract keywords once
+          // console.log('User keywords:', userKeywords); // Log user keywords
           let bestMatch: QnaItem | null = null;
           let maxMatches = 0;
 
           qna.forEach(item => {
             const qnaKeywords = extractKeywords(item.question);
+            // console.log(`QNA item: ${item.question}`, 'Keywords:', qnaKeywords); // Log QNA keywords
             const commonKeywords = userKeywords.filter(keyword => qnaKeywords.includes(keyword));
+            // console.log('Common keywords:', commonKeywords, 'Matches:', commonKeywords.length); // Log common keywords and count
             if (commonKeywords.length > maxMatches) {
               maxMatches = commonKeywords.length;
               bestMatch = item;
             }
           });
+
+          // console.log('Best match:', bestMatch ? bestMatch!.question : 'None', 'Max matches:', maxMatches); // Log best match and count with non-null assertion
 
           // Check if a best match was found and has more than 4 common keywords
           if (bestMatch && maxMatches > 4) {
@@ -145,7 +148,13 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
             setOutput(prev => [...prev, { type: 'output', text: 'Sorry, my program doesn\'t know the question you are asking' }]);
           }
         } else {
-          setOutput(prev => [...prev, { type: 'output', text: 'Please provide a question after the ask command.' }]);
+          // If no question is provided, list available questions
+          const availableQuestions = qna.map(item => `- ${item.question}`);
+          setOutput(prev => [
+            ...prev,
+            { type: 'output', text: 'Here are some questions you can ask:' },
+            ...availableQuestions.map(q => ({ type: 'output' as const, text: q }))
+          ]);
         }
         break;
       case '':
@@ -169,7 +178,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
   return (
     <div
       ref={terminalRef}
-      className="bg-gray-900 text-green-400 font-mono p-4 rounded-md overflow-y-auto w-full h-full text-sm"
+      className="bg-gray-900 text-green-400 font-mono p-3 overflow-y-auto w-full h-full text-sm"
       onClick={() => inputRef.current?.focus()} // Focus input when clicking terminal area
     >
       {output.map((line, index) => (

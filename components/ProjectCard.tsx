@@ -8,9 +8,8 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
   return (
-    <div className="relative bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all duration-300 hover:shadow-2xl hover:translate-y-[-5px] flex flex-col h-full">
-      <div className="relative h-48 w-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/60 z-10" />
+    <div className="relative bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all duration-300 flex flex-col h-full">
+      <div className="relative h-64 w-full overflow-hidden">
         <div className="w-full h-full bg-gray-700 relative">
           {/* Placeholder for project image */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -18,7 +17,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
               src={project.image} 
               alt={project.title}
               fill
-              className="opacity-90 object-cover"
+              className="object-cover"
             />
           </div>
         </div>
@@ -31,7 +30,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
           {project.tags.map((tag, index) => (
             <span
               key={index}
-              className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300"
+              className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white"
             >
               {tag}
             </span>
