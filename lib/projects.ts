@@ -6,17 +6,40 @@ export interface Project {
   tags: string[];
   demoUrl: string;
   githubUrl: string;
+  challenges?: string[];
+  solutions?: string[];
+  impact?: string;
+  additionalImages?: string[];
 }
 
 export const projects: Project[] = [
   {
     id: 'project-one',
     title: 'Uplink AI',
-    description: 'A modern AI-powered document management platform built with Next.js and Supabase, featuring secure authentication, real-time processing, and intelligent document analysis for streamlined team collaboration.',
-    image: '/images/uplinkai.png',
+    description: 'A modern AI-powered document management platform built with Next.js and Supabase, featuring secure authentication, real-time processing, and intelligent document analysis for streamlined team collaboration. Test it with username: test@test.com and password: password',
+    image: '/images/uplinkai/uplinkai.png',
     tags: ['Next.js', 'Supabase', 'tailwindcss', 'TypeScript'],
     demoUrl: 'https://uplink-ai.vercel.app/',
     githubUrl: 'https://github.com/ShawnBrownDev/uplink-ai',
+    challenges: [
+      'Implementing secure authentication and authorization with Supabase.',
+      'Handling real-time data updates efficiently.',
+      'Integrating external AI services for document analysis.',
+      'Optimizing data fetching and rendering performance in Next.js.',
+    ],
+    solutions: [
+      'Utilized Supabase Row Level Security (RLS) and policies for fine-grained access control.',
+      'Leveraged Supabase real-time subscriptions for instant data synchronization.',
+      'Designed a flexible API layer to interact with various AI APIs and handle responses.',
+      'Implemented server-side rendering (SSR) and static site generation (SSG) strategies in Next.js, along with data caching.',
+    ],
+    impact: 'Enabled streamlined document management and team collaboration with enhanced security and performance.',
+    additionalImages: [
+      '/images/uplinkai/uplinkai2.png',
+      '/images/uplinkai/uplink3.png',
+      '/images/uplinkai/uplink4.png',
+      '/images/uplinkai/uplink5.png'
+    ] 
   },
   // {
   //   id: 'project-two',

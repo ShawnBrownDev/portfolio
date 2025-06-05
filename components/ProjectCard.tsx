@@ -4,9 +4,10 @@ import { Github, ExternalLink } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
+  onViewMore: (project: Project) => void;
 }
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
+const ProjectCard = ({ project, onViewMore }: ProjectCardProps) => {
   return (
     <div className="relative bg-gray-800 rounded-lg overflow-hidden shadow-xl transition-all duration-300 flex flex-col h-full">
       <div className="relative h-64 w-full overflow-hidden">
@@ -40,6 +41,12 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         <p className="text-gray-300 mb-6 flex-grow">{project.description}</p>
 
         <div className="flex gap-3 mt-auto">
+          <button
+            onClick={() => onViewMore(project)}
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            View Card
+          </button>
           <a
             href={project.demoUrl}
             target="_blank"

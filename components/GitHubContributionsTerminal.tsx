@@ -27,6 +27,29 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
   const [output, setOutput] = useState<TerminalOutput[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+
+
+  const simulateInstall = async () => {
+    setOutput(prev => [...prev, { type: 'output', text: 'Installing...' }]);
+    for (let i = 0; i <= 100; i += 10) {
+      await new Promise(res => setTimeout(res, 200)); // simulate delay
+      setOutput(prev => [
+        ...prev.slice(0, -1),
+        { type: 'output', text: `Installing... ${i}%` }
+      ]);
+    }
+    setIsInstalled(true);
+    setOutput(prev => [
+      ...prev.slice(0, -1),
+      { type: 'output', text: '✅ Installation complete. You can now use the following commands:' },
+      { type: 'output', text: '- github: Display GitHub contribution graph' },
+      { type: 'output', text: '- ask: List questions you can add after ask <question>' },
+      { type: 'output', text: '- clear: Clear the terminal output' },
+    ]);
+  };
+  
 
   // Focus the input when the component mounts or output changes
   useEffect(() => {
@@ -83,10 +106,24 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
 
   const handleCommand = async (command: string) => {
     setOutput(prev => [...prev, { type: 'command', text: `$ ${command}` }]);
-    setInput(''); // Clear input after command
-
+    setInput('');
+  
     const [cmd, ...args] = command.trim().split(' ');
-
+  
+    if (!isInstalled && cmd !== 'sb' && cmd !== '') {
+      setOutput(prev => [...prev, { type: 'error', text: '⚠️ Please run sb install first.' }]);
+      return;
+    }
+  
+    if (cmd === 'sb' && args[0] === 'install') {
+      if (isInstalled) {
+        setOutput(prev => [...prev, { type: 'output', text: 'Already installed.' }]);
+      } else {
+        await simulateInstall();
+      }
+      return;
+    }
+  
     switch (cmd) {
       case 'help':
         setOutput(prev => [
@@ -95,19 +132,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           { type: 'output', text: '- github: Display GitHub contribution graph' },
           { type: 'output', text: '- ask: List questions you can add after ask <question>' },
           { type: 'output', text: '- clear: Clear the terminal output' },
-          // Add future game commands here
         ]);
-        break;
-      case 'github':
-        if (contributionData) {
-          setOutput(prev => [...prev, { type: 'output', text: renderContributionGrid(contributionData.contributions) }]);
-        } else if (!loading) {
-           // Fetch if not already loaded or loading
-          const data = await fetchContributions();
-           if (data) {
-             setOutput(prev => [...prev, { type: 'output', text: renderContributionGrid(data.contributions) }]);
-           }
-        }
         break;
       case 'clear':
         setOutput([]);

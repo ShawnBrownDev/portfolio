@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +25,15 @@ const Navbar = () => {
     { href: '#contact', label: 'Contact' },
   ];
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setIsOpen(false);
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -40,13 +49,14 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
-            <Link
+            <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-gray-200 hover:text-white transition-colors"
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="text-sm font-medium text-gray-200 hover:text-white transition-colors cursor-pointer"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -64,14 +74,14 @@ const Navbar = () => {
         <div className="md:hidden bg-background/95 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="text-lg font-medium text-gray-200 hover:text-white transition-colors"
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="text-lg font-medium text-gray-200 hover:text-white transition-colors cursor-pointer"
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
           </div>
         </div>
