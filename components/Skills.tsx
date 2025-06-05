@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { skills } from '@/lib/skills';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 // SVG paths for skill icons would normally be here
 // Using simplified placeholders for now
@@ -30,8 +31,7 @@ const Skills = () => {
               onMouseLeave={() => setActiveSkill(null)}
             >
               <div className="w-16 h-16 flex items-center justify-center mb-4">
-                {/* This would be replaced with actual skill icons */}
-                <span className="text-2xl font-bold">{skill.icon}</span>
+                <skill.icon className="w-8 h-8" />
               </div>
               <span className="text-sm font-medium">{skill.name}</span>
             </div>

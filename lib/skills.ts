@@ -1,31 +1,39 @@
+import { FaJs, FaReact, FaNodeJs, FaDocker } from 'react-icons/fa';
+import { SiTypescript, SiSupabase, SiPostgresql, SiNextdotjs } from 'react-icons/si';
+import { IconType } from 'react-icons';
+
 export interface Skill {
   name: string;
-  icon: string;
+  icon: IconType;
 }
 
 export const skills: Skill[] = [
   {
     name: 'JavaScript',
-    icon: 'js',
+    icon: FaJs,
   },
   {
     name: 'TypeScript',
-    icon: 'ts',
+    icon: SiTypescript,
   },
   {
     name: 'React',
-    icon: 'react',
+    icon: FaReact,
   },
   {
     name: 'Node.js',
-    icon: 'nodejs',
+    icon: FaNodeJs,
   },
   {
-    name: 'Docker',
-    icon: 'docker',
+    name: 'SupaBase',
+    icon: SiSupabase,
   },
   {
     name: 'PostgreSQL',
-    icon: 'postgresql',
+    icon: SiPostgresql,
+  },
+  {
+    name: 'Next.js',
+    icon: SiNextdotjs,
   },
 ];

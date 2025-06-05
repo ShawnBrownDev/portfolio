@@ -9,26 +9,26 @@ export interface ExperienceItem {
 export const experiences: ExperienceItem[] = [
   {
     id: 'exp-1',
-    title: 'AWS Certified Solutions Architect',
+    title: 'Started Self Learning',
     company: '',
-    period: '2025',
+    period: '2019',
   },
   {
     id: 'exp-2',
-    title: 'Lead Developer',
+    title: 'Self Employed Full Stack Developer',
     company: 'Globex',
-    period: '2020-2023',
+    period: '2020-2025',
   },
-  {
-    id: 'exp-3',
-    title: 'Software Engineer',
-    company: 'Acmo Corp',
-    period: '2015-2020',
-  },
-  {
-    id: 'exp-4',
-    title: 'M.S. in Computer Science',
-    company: '',
-    period: '',
-  },
+  // {
+  //   id: 'exp-3',
+  //   title: 'Software Engineer',
+  //   company: 'Acmo Corp',
+  //   period: '2015-2020',
+  // },
+  // {
+  //   id: 'exp-4',
+  //   title: 'M.S. in Computer Science',
+  //   company: '',
+  //   period: '',
+  // },
 ];

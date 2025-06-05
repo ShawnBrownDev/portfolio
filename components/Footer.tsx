@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Github, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -26,7 +26,7 @@ const Footer = () => {
               <span className="sr-only">GitHub</span>
             </a>
             <a
-              href="mailto:your@email.com"
+              href="shawnbrowndevelopment@gmail.com"
               className="text-gray-400 hover:text-white transition-colors"
             >
               <Mail className="h-5 w-5" />

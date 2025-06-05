@@ -48,9 +48,6 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <button className="text-gray-200 hover:text-white transition-colors">
-            <Search size={20} />
-          </button>
         </nav>
 
         {/* Mobile Navigation Toggle */}
