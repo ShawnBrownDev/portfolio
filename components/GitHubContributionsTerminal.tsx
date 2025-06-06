@@ -193,7 +193,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           // console.log('Best match:', bestMatch ? bestMatch!.question : 'None', 'Max matches:', maxMatches); // Log best match and count with non-null assertion
 
           // Check if a best match was found and has more than 4 common keywords
-          if (bestMatch && maxMatches > 4) {
+          if (bestMatch && maxMatches >= 4) {
             setOutput(prev => [...prev, { type: 'output', text: bestMatch!.answer }]);
           } else {
             setOutput(prev => [...prev, { type: 'output', text: 'Sorry, my program doesn\'t know the question you are asking' }]);
