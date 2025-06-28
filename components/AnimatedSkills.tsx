@@ -99,7 +99,7 @@ const AnimatedSkills = () => {
           animate={controls}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {filteredSkills.map((skill: Skill) => (
               <motion.div
                 key={skill.name}
