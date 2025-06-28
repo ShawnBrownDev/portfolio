@@ -1,62 +1,196 @@
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  tags: string[];
-  demoUrl: string;
-  githubUrl: string;
-  challenges?: string[];
-  solutions?: string[];
-  impact?: string;
-  additionalImages?: string[];
+import { supabase } from './supabase';
+import type { Database } from '@/types/supabase';
+
+export type Project = Database['public']['Tables']['projects']['Row'];
+export type ProjectInsert = Database['public']['Tables']['projects']['Insert'];
+export type Category = Database['public']['Tables']['categories']['Row'];
+
+export async function getProjects(): Promise<(Project & { categories: Category[] })[]> {
+  if (!supabase) {
+    throw new Error('Supabase client is not configured. Please check your environment variables.');
+  }
+
+  try {
+    // First, get all projects with their categories
+    const { data: projects, error: projectsError } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        categories:project_categories(
+          category:categories(
+            id,
+            name,
+            description
+          )
+        )
+      `);
+
+    if (projectsError) {
+      console.error('Error fetching projects:', projectsError);
+      return [];
+    }
+
+    // Transform the data to match our expected format
+    const transformedProjects = projects.map(project => {
+      const categories = project.categories
+        ? project.categories
+            .map((pc: any) => pc.category)
+            .filter(Boolean)
+        : [];
+      const { categories: _, ...projectWithoutCategories } = project;
+      return {
+        ...projectWithoutCategories,
+        categories
+      };
+    });
+
+    return transformedProjects;
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    return [];
+  }
 }
 
-export const projects: Project[] = [
-  {
-    id: 'project-one',
-    title: 'Uplink AI',
-    description: 'A modern AI-powered document management platform built with Next.js and Supabase, featuring secure authentication, real-time processing, and intelligent document analysis for streamlined team collaboration. Test it with username: test@test.com and password: password',
-    image: '/images/uplinkai/uplinkai.png',
-    tags: ['Next.js', 'Supabase', 'tailwindcss', 'TypeScript'],
-    demoUrl: 'https://uplink-ai.vercel.app/',
-    githubUrl: 'https://github.com/ShawnBrownDev/uplink-ai',
-    challenges: [
-      'Implementing secure authentication and authorization with Supabase.',
-      'Handling real-time data updates efficiently.',
-      'Integrating external AI services for document analysis.',
-      'Optimizing data fetching and rendering performance in Next.js.',
-    ],
-    solutions: [
-      'Utilized Supabase Row Level Security (RLS) and policies for fine-grained access control.',
-      'Leveraged Supabase real-time subscriptions for instant data synchronization.',
-      'Designed a flexible API layer to interact with various AI APIs and handle responses.',
-      'Implemented server-side rendering (SSR) and static site generation (SSG) strategies in Next.js, along with data caching.',
-    ],
-    impact: 'Enabled streamlined document management and team collaboration with enhanced security and performance.',
-    additionalImages: [
-      '/images/uplinkai/uplinkai2.png',
-      '/images/uplinkai/uplink3.png',
-      '/images/uplinkai/uplink4.png',
-      '/images/uplinkai/uplink5.png'
-    ] 
-  },
-  // {
-  //   id: 'project-two',
-  //   title: 'Project Two',
-  //   description: 'A full-stack application with real-time data processing',
-  //   image: '/images/project2.png',
-  //   tags: ['Node.js', 'MongoDB'],
-  //   demoUrl: 'https://demo.example.com/project2',
-  //   githubUrl: 'https://github.com/johndoe/project2',
-  // },
-  // {
-  //   id: 'project-three',
-  //   title: 'Project Three',
-  //   description: 'An AI-powered data analysis and visualization tool',
-  //   image: '/images/project3.png',
-  //   tags: ['Python', 'TensorFlow'],
-  //   demoUrl: 'https://demo.example.com/project3',
-  //   githubUrl: 'https://github.com/johndoe/project3',
-  // },
-];
+export async function getCategories(): Promise<Category[]> {
+  if (!supabase) {
+    throw new Error('Supabase client is not configured. Please check your environment variables.');
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching categories:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+}
+
+export async function addProjectCategories(projectId: string, categoryIds: string[]): Promise<void> {
+  if (!supabase) {
+    throw new Error('Supabase client is not configured. Please check your environment variables.');
+  }
+
+  try {
+    const { error } = await supabase
+      .from('project_categories')
+      .insert(
+        categoryIds.map(categoryId => ({
+          project_id: projectId,
+          category_id: categoryId
+        }))
+      );
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error adding project categories:', error);
+    throw error;
+  }
+}
+
+export async function addProject(project: Omit<ProjectInsert, 'id'>, categoryIds: string[] = []): Promise<{ data: Project | null; error: any }> {
+  if (!supabase) {
+    throw new Error('Supabase client is not configured. Please check your environment variables.');
+  }
+
+  try {
+    // Generate a unique ID for the project
+    const id = crypto.randomUUID();
+
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([{ ...project, id }])
+      .select()
+      .single();
+
+    if (error) {
+      return { data: null, error };
+    }
+
+    // If we have categories, add them
+    if (categoryIds.length > 0) {
+      await addProjectCategories(id, categoryIds);
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
+
+export async function updateProject(
+  id: string,
+  projectData: Partial<Omit<Project, 'id'>>,
+  categoryIds: string[]
+): Promise<{ error: Error | null }> {
+  if (!supabase) {
+    return { error: new Error('Supabase client not initialized') };
+  }
+
+  try {
+    // Start a transaction by using RPC
+    const { error: projectError } = await supabase
+      .from('projects')
+      .update({
+        title: projectData.title,
+        description: projectData.description,
+        image: projectData.image,
+        githuburl: projectData.githuburl,
+        demourl: projectData.demourl,
+        additionalimages: projectData.additionalimages,
+        challenges: projectData.challenges,
+        solutions: projectData.solutions,
+        impact: projectData.impact,
+        tags: projectData.tags
+      })
+      .eq('id', id);
+
+    if (projectError) {
+      console.error('Error updating project:', projectError);
+      throw projectError;
+    }
+
+    // Delete existing categories
+    const { error: deleteError } = await supabase
+      .from('project_categories')
+      .delete()
+      .eq('project_id', id);
+
+    if (deleteError) {
+      console.error('Error deleting existing categories:', deleteError);
+      throw deleteError;
+    }
+
+    // Add new categories if any are provided
+    if (categoryIds.length > 0) {
+      const { error: insertError } = await supabase
+        .from('project_categories')
+        .insert(
+          categoryIds.map(categoryId => ({
+            project_id: id,
+            category_id: categoryId
+          }))
+        );
+
+      if (insertError) {
+        console.error('Error inserting new categories:', insertError);
+        throw insertError;
+      }
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Error in updateProject:', error);
+    return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
+  }
+} 

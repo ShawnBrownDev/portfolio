@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Project } from '@/lib/projects';
+import { Project } from '../lib/projects';
 import { X, ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -11,7 +11,7 @@ interface ProjectModalProps {
 }
 
 const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
-  const allImages = [project.image, ...(project.additionalImages || [])];
+  const allImages = [project.image, ...(project.additionalimages || [])];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleNextImage = () => {
@@ -71,12 +71,11 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             </>
           )}
         </div>
-       
 
         <p className="text-gray-300 mb-4">{project.description}</p>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags.map((tag, index) => (
+          {project.tags?.map((tag, index) => (
             <span
               key={index}
               className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white"
@@ -116,27 +115,30 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         )}
 
         <div className="flex gap-3 mt-6 justify-end">
-           <a
-            href={project.demoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Live Demo
-          </a>
+          {project.demourl && (
+            <a
+              href={project.demourl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Live Demo
+            </a>
+          )}
 
-          <a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border border-input bg-transparent rounded-md hover:bg-accent hover:text-accent-foreground"
-          >
-            <Github className="mr-2 h-4 w-4" />
-            GitHub
-          </a>
+          {project.githuburl && (
+            <a
+              href={project.githuburl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border border-input bg-transparent rounded-md hover:bg-accent hover:text-accent-foreground"
+            >
+              <Github className="mr-2 h-4 w-4" />
+              GitHub
+            </a>
+          )}
         </div>
-
       </div>
     </div>
   );
