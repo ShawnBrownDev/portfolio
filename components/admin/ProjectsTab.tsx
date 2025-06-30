@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Project } from '@/types/project';
 import { ProjectCard } from './ProjectCard';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export function ProjectsTab() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const { showNotification } = useNotification();
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/projects');
@@ -38,11 +38,11 @@ export function ProjectsTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification]);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -103,13 +103,13 @@ export function ProjectsTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
+              <ProjectCard
+                key={project.id}
+                project={project}
               onDelete={handleDelete}
               onUpdate={fetchProjects}
-            />
-          ))}
+              />
+            ))}
         </div>
       )}
 
@@ -118,7 +118,7 @@ export function ProjectsTab() {
           <DialogHeader>
             <DialogTitle>Add New Project</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Fill in the project details below. Click add when you're done.
+              Fill in the project details below. Click add when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
           <ProjectForm

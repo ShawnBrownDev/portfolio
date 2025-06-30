@@ -126,7 +126,7 @@ export async function addProject(project: Omit<ProjectInsert, 'id'>, categoryIds
   } catch (error) {
     return { data: null, error };
   }
-}
+} 
 
 export async function updateProject(
   id: string,
