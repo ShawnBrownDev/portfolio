@@ -28,7 +28,7 @@ export function UserInfoCard() {
         showNotification('error', 'Failed to fetch user data');
       } finally {
         setLoading(false);
-      }
+}
     }
 
     getUser();
@@ -52,7 +52,7 @@ export function UserInfoCard() {
   }
 
   if (!user) {
-    return (
+  return (
       <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-6">
         <p className="text-gray-400">Please sign in to access the dashboard.</p>
       </div>
@@ -64,8 +64,8 @@ export function UserInfoCard() {
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
           <Mail className="w-6 h-6 text-blue-500" />
-        </div>
-        <div>
+      </div>
+      <div>
           <h3 className="text-white font-medium">User Email</h3>
           <p className="text-gray-400">{user.email}</p>
         </div>

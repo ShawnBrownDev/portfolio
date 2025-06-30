@@ -1,4 +1,8 @@
+'use client';
+
+import React from 'react';
 import { ExperienceItem } from '@/lib/experience';
+import { motion } from 'framer-motion';
 
 interface TimelineItemProps {
   item: ExperienceItem;
@@ -6,32 +10,42 @@ interface TimelineItemProps {
   index: number;
 }
 
-const TimelineItem = ({ item, isLast, index }: TimelineItemProps) => {
-  const isStart = index % 2 === 0;
-  const timelineBoxClass = isStart ? "timeline-start" : "timeline-end";
-
+const TimelineItem: React.FC<TimelineItemProps> = ({ item, isLast, index }) => {
   return (
-    <li>
-      {!isStart && <hr />}
-      <div className="timeline-middle">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.698a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.06l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" /></svg>
-      </div>
-      <div className={`${timelineBoxClass} timeline-box bg-gray-800 p-4 rounded-lg`}>
-        <div className="flex flex-col">
-          <h3 className="text-lg font-semibold">{item.title}</h3>
-          {item.company && (
-            <span className="text-gray-400">{item.company}</span>
-          )}
-          {item.period && (
-            <p className="text-sm text-gray-500 mt-1">{item.period}</p>
-          )}
-          {item.description && (
-            <p className="text-gray-300 mt-2">{item.description}</p>
-          )}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.3 }}
+      className="relative flex items-start mb-12 last:mb-0"
+    >
+      {/* Connector Line */}
+      {!isLast && (
+        <div className="absolute left-2.5 top-3 w-[1px] h-[calc(100%+24px)] bg-blue-500/20" />
+      )}
+
+      {/* Timeline Node */}
+      <div className="relative z-10">
+        <div className="w-5 h-5 rounded-full bg-[#0A0F1E] border border-blue-500/20 flex items-center justify-center">
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-500/30" />
         </div>
       </div>
-      {isStart && !isLast && <hr />}
-    </li>
+
+      {/* Content */}
+      <div className="ml-6 flex-1">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base text-white">
+            {item.title}
+          </h3>
+          <span className="text-sm text-slate-200 bg-[#0A0F1E] px-3 py-0.5 rounded-[4px]">
+            {item.period}
+          </span>
+        </div>
+        
+        <span className="block text-sm text-slate-300 mt-1.5">
+          {item.company}
+        </span>
+      </div>
+    </motion.div>
   );
 };
 

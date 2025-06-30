@@ -23,17 +23,17 @@ interface ProjectFormProps {
 }
 
 const initialFormState: ProjectFormData = {
-  title: '',
-  description: '',
-  image: '',
-  tags: [],
-  demourl: '',
-  githuburl: '',
-  challenges: [],
-  solutions: [],
-  impact: '',
-  additionalimages: [],
-  selectedCategoryIds: []
+    title: '',
+    description: '',
+    image: '',
+    tags: [],
+    demourl: '',
+    githuburl: '',
+    challenges: [],
+    solutions: [],
+    impact: '',
+    additionalimages: [],
+    selectedCategoryIds: []
 };
 
 export default function ProjectForm({ project, onClose, onSuccess, mode = 'create' }: ProjectFormProps) {
@@ -178,134 +178,134 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left column - Form inputs */}
         <div className="space-y-4">
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Project Title *</label>
-            <input
-              name="title"
+        <input
+          name="title"
               placeholder="Enter project title"
-              value={form.title}
-              onChange={handleChange}
+          value={form.title}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-              required
-            />
-          </div>
+          required
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Description *</label>
-            <textarea
-              name="description"
+        <textarea
+          name="description"
               placeholder="Describe your project"
-              value={form.description}
-              onChange={handleChange}
+          value={form.description}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[120px]"
-              required
-            />
-          </div>
+          required
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Main Image URL *</label>
-            <input
-              name="image"
+        <input
+          name="image"
               placeholder="Enter image URL"
-              value={form.image}
-              onChange={handleChange}
+          value={form.image}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-              required
-            />
-          </div>
+          required
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Categories *</label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {categories.map(category => (
-                <Badge
-                  key={category.id}
-                  variant={form.selectedCategoryIds.includes(category.id) ? "default" : "outline"}
+        <div className="flex flex-wrap gap-2 mb-2">
+          {categories.map(category => (
+            <Badge
+              key={category.id}
+              variant={form.selectedCategoryIds.includes(category.id) ? "default" : "outline"}
                   className="cursor-pointer hover:bg-[#333] transition-colors"
-                  onClick={() => toggleCategory(category.id)}
-                >
-                  {category.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
+              onClick={() => toggleCategory(category.id)}
+            >
+              {category.name}
+            </Badge>
+          ))}
+        </div>
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Tags</label>
             <TagInput
               value={form.tags || []}
               onChange={(newTags) => setForm(prev => ({ ...prev, tags: newTags }))}
               placeholder="Add technologies used..."
               suggestions={TECHNOLOGY_TAGS}
-            />
-          </div>
+        />
+      </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
+      <div>
               <label className="block text-sm font-medium mb-1 text-white">Demo URL</label>
-              <input
-                name="demourl"
+        <input
+          name="demourl"
                 placeholder="https://..."
-                value={form.demourl || ''}
-                onChange={handleChange}
+          value={form.demourl || ''}
+          onChange={handleChange}
                 className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-              />
-            </div>
-            <div>
+        />
+      </div>
+      <div>
               <label className="block text-sm font-medium mb-1 text-white">GitHub URL</label>
-              <input
-                name="githuburl"
+        <input
+          name="githuburl"
                 placeholder="https://github.com/..."
-                value={form.githuburl || ''}
-                onChange={handleChange}
+          value={form.githuburl || ''}
+          onChange={handleChange}
                 className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-              />
+        />
             </div>
           </div>
-        </div>
+      </div>
 
         {/* Right column - Additional fields and preview */}
         <div className="space-y-4">
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Challenges</label>
             <textarea
-              name="challenges"
+          name="challenges"
               placeholder="List the main challenges (comma-separated)"
-              value={form.challenges?.join(', ') || ''}
-              onChange={handleChange}
+          value={form.challenges?.join(', ') || ''}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-            />
-          </div>
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Solutions</label>
             <textarea
-              name="solutions"
+          name="solutions"
               placeholder="List your solutions (comma-separated)"
-              value={form.solutions?.join(', ') || ''}
-              onChange={handleChange}
+          value={form.solutions?.join(', ') || ''}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-            />
-          </div>
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Project Impact</label>
-            <textarea
-              name="impact"
+        <textarea
+          name="impact"
               placeholder="Describe the project's impact"
-              value={form.impact || ''}
-              onChange={handleChange}
+          value={form.impact || ''}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-            />
-          </div>
+        />
+      </div>
 
-          <div>
+      <div>
             <label className="block text-sm font-medium mb-1 text-white">Additional Images</label>
-            <input
-              name="additionalimages"
+        <input
+          name="additionalimages"
               placeholder="Additional image URLs (comma-separated)"
-              value={form.additionalimages?.join(', ') || ''}
-              onChange={handleChange}
+          value={form.additionalimages?.join(', ') || ''}
+          onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
             />
           </div>
@@ -315,10 +315,12 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <div className="mt-4">
               <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
               <div className="relative w-full h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                <img
+                <Image
                   src={previewImage}
                   alt="Preview"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
             </div>
@@ -341,11 +343,11 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         >
           {onClose ? 'Cancel' : 'Clear Form'}
         </Button>
-        <Button
-          type="submit"
-          disabled={loading}
+      <Button
+        type="submit"
+        disabled={loading}
           className="bg-white text-black hover:bg-gray-100"
-        >
+      >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -354,7 +356,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
           ) : (
             mode === 'edit' ? 'Update Project' : 'Add Project'
           )}
-        </Button>
+      </Button>
       </div>
     </form>
   );

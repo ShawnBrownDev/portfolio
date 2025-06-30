@@ -34,7 +34,7 @@ function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        showNotification('success', 'Successfully logged in!');
+      showNotification('success', 'Successfully logged in!');
         router.push('/dashboard');
       } else {
         throw new Error('No session created after login');
