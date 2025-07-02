@@ -128,20 +128,13 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     setError(null);
 
     try {
-      const supabase = createClientComponentClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('You must be logged in to create a project');
-      }
-
       const { selectedCategoryIds, ...projectData } = form;
       let error;
 
       if (mode === 'edit' && project) {
         ({ error } = await updateProject(project.id, projectData, selectedCategoryIds));
       } else {
-        ({ error } = await addProject({ ...projectData, user_id: session.user.id }, selectedCategoryIds));
+        ({ error } = await addProject(projectData, selectedCategoryIds));
       }
       
       if (error) throw error;
