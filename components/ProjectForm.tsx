@@ -12,7 +12,7 @@ import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-type ProjectFormData = Omit<Project, 'id'> & {
+type ProjectFormData = Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & {
   selectedCategoryIds: string[];
 };
 
@@ -23,17 +23,17 @@ interface ProjectFormProps {
   mode?: 'create' | 'edit';
 }
 
-const initialFormState: ProjectFormData = {
+const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & { selectedCategoryIds: string[] } = {
     title: '',
     description: '',
     image: '',
-    tags: [],
-    demourl: '',
-    githuburl: '',
-    challenges: [],
-    solutions: [],
-    impact: '',
-    additionalimages: [],
+    demourl: null,
+    githuburl: null,
+    challenges: null,
+    solutions: null,
+    impact: null,
+    additionalimages: null,
+    tags: null,
     selectedCategoryIds: []
 };
 
