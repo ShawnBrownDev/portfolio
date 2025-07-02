@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import type { Database } from '@/types/supabase';
 
 export type Project = Database['public']['Tables']['projects']['Row'];
-export type ProjectInsert = Database['public']['Tables']['projects']['Insert'];
+export type ProjectInsert = Omit<Project, 'id' | 'created_at'>;
 export type Category = Database['public']['Tables']['categories']['Row'];
 
 export async function getProjects(): Promise<(Project & { categories: Category[] })[]> {
@@ -98,18 +98,27 @@ export async function addProjectCategories(projectId: string, categoryIds: strin
   }
 }
 
-export async function addProject(project: Omit<ProjectInsert, 'id'>, categoryIds: string[] = []): Promise<{ data: Project | null; error: any }> {
+export async function addProject(
+  project: Omit<ProjectInsert, 'user_id'>, 
+  categoryIds: string[] = []
+): Promise<{ data: Project | null; error: any }> {
   if (!supabase) {
     throw new Error('Supabase client is not configured. Please check your environment variables.');
   }
 
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('No authenticated session found');
+    }
+
     // Generate a unique ID for the project
     const id = crypto.randomUUID();
 
     const { data, error } = await supabase
       .from('projects')
-      .insert([{ ...project, id }])
+      .insert([{ ...project, id, user_id: session.user.id }])
       .select()
       .single();
 
@@ -126,7 +135,7 @@ export async function addProject(project: Omit<ProjectInsert, 'id'>, categoryIds
   } catch (error) {
     return { data: null, error };
   }
-} 
+}
 
 export async function updateProject(
   id: string,

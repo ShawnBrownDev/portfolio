@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Edit2, Trash2, Globe, Github } from 'lucide-react';
-import type { Project } from '@/types/project';
+import { Project } from '@/types/project';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,11 +20,10 @@ import {
 interface ProjectCardProps {
   project: Project;
   onDelete: (id: string) => void;
-  onEdit?: (project: Project) => void;
-  onUpdate?: () => void;
+  onUpdate: () => void;
 }
 
-export function ProjectCard({ project, onDelete, onEdit, onUpdate }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onUpdate }: ProjectCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   const handleEdit = () => {
@@ -42,7 +41,7 @@ export function ProjectCard({ project, onDelete, onEdit, onUpdate }: ProjectCard
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-        </div>
+      </div>
         <div className="p-4">
         <div className="flex items-start justify-between">
             <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
 
 type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
@@ -14,6 +15,8 @@ type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
 
 export async function GET() {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       console.error('Supabase client not initialized');
       return NextResponse.json(
@@ -58,6 +61,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database client not initialized' },
@@ -94,6 +99,8 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database client not initialized' },

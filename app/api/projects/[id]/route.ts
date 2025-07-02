@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { Database } from '@/types/supabase';
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database client not initialized' },
@@ -45,6 +49,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database client not initialized' },
@@ -54,12 +60,28 @@ export async function DELETE(
 
     const { id } = params;
 
+    // First delete associated project categories
+    const { error: categoriesError } = await supabase
+      .from('project_categories')
+      .delete()
+      .eq('project_id', id);
+
+    if (categoriesError) {
+      console.error('Error deleting project categories:', categoriesError);
+      return NextResponse.json(
+        { error: categoriesError.message },
+        { status: 500 }
+      );
+    }
+
+    // Then delete the project
     const { error } = await supabase
       .from('projects')
       .delete()
       .eq('id', id);
 
     if (error) {
+      console.error('Error deleting project:', error);
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -81,6 +103,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
     if (!supabase) {
       return NextResponse.json(
         { error: 'Database client not initialized' },

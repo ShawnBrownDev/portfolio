@@ -10,8 +10,9 @@ import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-type ProjectFormData = Omit<Project, 'id'> & {
+type ProjectFormData = Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & {
   selectedCategoryIds: string[];
 };
 
@@ -22,17 +23,17 @@ interface ProjectFormProps {
   mode?: 'create' | 'edit';
 }
 
-const initialFormState: ProjectFormData = {
+const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & { selectedCategoryIds: string[] } = {
     title: '',
     description: '',
     image: '',
-    tags: [],
-    demourl: '',
-    githuburl: '',
-    challenges: [],
-    solutions: [],
-    impact: '',
-    additionalimages: [],
+    demourl: null,
+    githuburl: null,
+    challenges: null,
+    solutions: null,
+    impact: null,
+    additionalimages: null,
+    tags: null,
     selectedCategoryIds: []
 };
 
@@ -321,7 +322,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
+        />
               </div>
             </div>
           )}
