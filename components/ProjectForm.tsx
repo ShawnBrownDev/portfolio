@@ -10,6 +10,7 @@ import { Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 type ProjectFormData = Omit<Project, 'id'> & {
   selectedCategoryIds: string[];
@@ -127,13 +128,20 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     setError(null);
 
     try {
+      const supabase = createClientComponentClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('You must be logged in to create a project');
+      }
+
       const { selectedCategoryIds, ...projectData } = form;
       let error;
 
       if (mode === 'edit' && project) {
         ({ error } = await updateProject(project.id, projectData, selectedCategoryIds));
       } else {
-        ({ error } = await addProject(projectData, selectedCategoryIds));
+        ({ error } = await addProject({ ...projectData, user_id: session.user.id }, selectedCategoryIds));
       }
       
       if (error) throw error;
@@ -321,7 +329,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
+        />
               </div>
             </div>
           )}

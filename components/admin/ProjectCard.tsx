@@ -42,7 +42,7 @@ export function ProjectCard({ project, onDelete, onEdit, onUpdate }: ProjectCard
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
-        </div>
+      </div>
         <div className="p-4">
         <div className="flex items-start justify-between">
             <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>
