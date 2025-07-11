@@ -11,7 +11,7 @@ export async function getProjects(): Promise<(Project & { categories: Category[]
   }
 
   try {
-    // First, get all projects with their categories
+    // First, get all published projects with their categories
     const { data: projects, error: projectsError } = await supabase
       .from('projects')
       .select(`
@@ -23,7 +23,8 @@ export async function getProjects(): Promise<(Project & { categories: Category[]
             description
           )
         )
-      `);
+      `)
+      .eq('is_published', true);
 
     if (projectsError) {
       console.error('Error fetching projects:', projectsError);
@@ -118,7 +119,7 @@ export async function addProject(
 
     const { data, error } = await supabase
       .from('projects')
-      .insert([{ ...project, id, user_id: session.user.id }])
+      .insert([{ ...project, id, user_id: session.user.id, is_published: false } as any])
       .select()
       .single();
 
@@ -200,6 +201,101 @@ export async function updateProject(
     return { error: null };
   } catch (error) {
     console.error('Error in updateProject:', error);
+    return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
+  }
+} 
+
+export async function getAllProjects(): Promise<(Project & { categories: Category[] })[]> {
+  if (!supabase) {
+    throw new Error('Supabase client is not configured. Please check your environment variables.');
+  }
+
+  try {
+    // Get all projects (including unpublished) with their categories
+    const { data: projects, error: projectsError } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        categories:project_categories(
+          category:categories(
+            id,
+            name,
+            description
+          )
+        )
+      `);
+
+    if (projectsError) {
+      console.error('Error fetching all projects:', projectsError);
+      return [];
+    }
+
+    // Transform the data to match our expected format
+    const transformedProjects = projects.map(project => {
+      const categories = project.categories
+        ? project.categories
+            .map((pc: any) => pc.category)
+            .filter(Boolean)
+        : [];
+      const { categories: _, ...projectWithoutCategories } = project;
+      return {
+        ...projectWithoutCategories,
+        categories
+      };
+    });
+
+    return transformedProjects;
+  } catch (error) {
+    console.error('Error fetching all projects:', error);
+    return [];
+  }
+} 
+
+export async function toggleProjectPublishedStatus(
+  projectId: string,
+  isPublished: boolean
+): Promise<{ error: Error | null }> {
+  if (!supabase) {
+    return { error: new Error('Supabase client not initialized') };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('projects')
+      .update({ is_published: isPublished } as any)
+      .eq('id', projectId);
+
+    if (error) {
+      console.error('Error updating project published status:', error);
+      return { error: new Error(error.message) };
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Error in toggleProjectPublishedStatus:', error);
+    return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
+  }
+} 
+
+export async function publishAllProjects(): Promise<{ error: Error | null }> {
+  if (!supabase) {
+    return { error: new Error('Supabase client not initialized') };
+  }
+
+  try {
+    const { error } = await supabase
+      .from('projects')
+      .update({ is_published: true } as any)
+      .is('is_published', null);
+
+    if (error) {
+      console.error('Error publishing all projects:', error);
+      return { error: new Error(error.message) };
+    }
+
+    return { error: null };
+  } catch (error) {
+    console.error('Error in publishAllProjects:', error);
     return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
   }
 } 

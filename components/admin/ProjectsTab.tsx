@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Project } from '@/types/project';
 import { ProjectCard } from './ProjectCard';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Globe } from 'lucide-react';
 import ProjectForm from '@/components/ProjectForm';
 import {
   Dialog,
@@ -14,11 +14,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNotification } from '@/contexts/NotificationContext';
+import { publishAllProjects } from '@/lib/projects';
 
 export function ProjectsTab() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [publishingAll, setPublishingAll] = useState(false);
   const { showNotification } = useNotification();
 
   const fetchProjects = useCallback(async () => {
@@ -63,17 +65,48 @@ export function ProjectsTab() {
     }
   };
 
+  const handlePublishAll = async () => {
+    setPublishingAll(true);
+    try {
+      const { error } = await publishAllProjects();
+      if (error) {
+        showNotification('error', error.message);
+      } else {
+        showNotification('success', 'All projects published successfully');
+        fetchProjects();
+      }
+    } catch (error) {
+      showNotification('error', 'Failed to publish all projects');
+    } finally {
+      setPublishingAll(false);
+    }
+  };
+
+  const unpublishedCount = projects.filter(p => !p.is_published).length;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-white">Projects</h2>
-        <Button
-          onClick={() => setShowAddDialog(true)}
-          className="bg-white text-black hover:bg-gray-100"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Project
-        </Button>
+        <div className="flex gap-2">
+          {unpublishedCount > 0 && (
+            <Button
+              onClick={handlePublishAll}
+              disabled={publishingAll}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <Globe className="mr-2 h-4 w-4" />
+              {publishingAll ? 'Publishing...' : `Publish All (${unpublishedCount})`}
+            </Button>
+          )}
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className="bg-white text-black hover:bg-gray-100"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Project
+          </Button>
+        </div>
       </div>
 
       {loading ? (

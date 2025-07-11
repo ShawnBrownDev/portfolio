@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
+import { getAllProjects } from '@/lib/projects';
 
 type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
   project_categories: Array<{
@@ -15,41 +16,11 @@ type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
 
 export async function GET() {
   try {
-    const supabase = createRouteHandlerClient<Database>({ cookies });
-    
-    if (!supabase) {
-      console.error('Supabase client not initialized');
-      return NextResponse.json(
-        { error: 'Database client not initialized' },
-        { status: 500 }
-      );
-    }
+    console.log('Fetching all projects from Supabase...');
+    const projects = await getAllProjects();
 
-    console.log('Fetching projects from Supabase...');
-    const { data, error } = await supabase
-      .from('projects')
-      .select(`
-        *,
-        project_categories (
-          category_id,
-          categories (
-            id,
-            name
-          )
-        )
-      `)
-      .returns<ProjectWithCategories[]>();
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
-
-    console.log('Successfully fetched projects:', data?.length);
-    return NextResponse.json(data || []);
+    console.log('Successfully fetched projects:', projects?.length);
+    return NextResponse.json(projects || []);
   } catch (error) {
     console.error('Error in GET /api/projects:', error);
     return NextResponse.json(
