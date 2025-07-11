@@ -46,6 +46,15 @@ const Projects = () => {
         project.categories.some(category => category.id === selectedCategory)
       );
 
+  // Get unique categories from published projects
+  const projectCategories = Array.from(
+    new Map(
+      projects
+        .flatMap((project) => project.categories)
+        .map((cat) => [cat.id, cat])
+    ).values()
+  );
+
   if (loading) {
     return (
       <section id="projects" className="py-20">
@@ -82,7 +91,7 @@ const Projects = () => {
           >
             All
           </motion.button>
-          {categories.map((category) => (
+          {projectCategories.map((category) => (
             <motion.button
               key={category.id}
               whileHover={{ scale: 1.05 }}
