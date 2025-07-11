@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Edit2, Trash2, Globe, Github } from 'lucide-react';
+import { Edit2, Trash2, Globe, Github, Eye, EyeOff } from 'lucide-react';
 import { Project } from '@/types/project';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toggleProjectPublishedStatus } from '@/lib/projects';
+import { useNotification } from '@/contexts/NotificationContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -25,9 +27,28 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onDelete, onUpdate }: ProjectCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const { showNotification } = useNotification();
 
   const handleEdit = () => {
     setShowEditDialog(true);
+  };
+
+  const handleTogglePublished = async () => {
+    setIsToggling(true);
+    try {
+      const { error } = await toggleProjectPublishedStatus(project.id, !project.is_published);
+      if (error) {
+        showNotification('error', error.message);
+      } else {
+        showNotification('success', `Project ${project.is_published ? 'unpublished' : 'published'} successfully`);
+        onUpdate();
+      }
+    } catch (error) {
+      showNotification('error', 'Failed to update project status');
+    } finally {
+      setIsToggling(false);
+    }
   };
 
   return (
@@ -41,11 +62,26 @@ export function ProjectCard({ project, onDelete, onUpdate }: ProjectCardProps) {
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
+          {!project.is_published && (
+            <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">
+              Draft
+            </div>
+          )}
       </div>
         <div className="p-4">
         <div className="flex items-start justify-between">
             <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>
             <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-400 hover:text-blue-400"
+                onClick={handleTogglePublished}
+                disabled={isToggling}
+                title={project.is_published ? 'Unpublish' : 'Publish'}
+              >
+                {project.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

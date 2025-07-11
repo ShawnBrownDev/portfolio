@@ -18,7 +18,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body className={cn(inter.className, "bg-background text-foreground antialiased")}>
+      <body 
+        className={cn(inter.className, "bg-background text-foreground antialiased")}
+        suppressHydrationWarning={true}
+      >
         <ThemeProvider>
           {children}
         </ThemeProvider>
