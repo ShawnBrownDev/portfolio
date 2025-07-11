@@ -21,34 +21,17 @@ import { useNotification } from '@/contexts/NotificationContext';
 
 interface ProjectCardProps {
   project: Project;
+  handleTogglePublished: (project: Project) => void;
+  isToggling: boolean;
   onDelete: (id: string) => void;
   onUpdate: () => void;
 }
 
-export function ProjectCard({ project, onDelete, onUpdate }: ProjectCardProps) {
+export function ProjectCard({ project, handleTogglePublished, isToggling, onDelete, onUpdate }: ProjectCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
-  const { showNotification } = useNotification();
 
   const handleEdit = () => {
     setShowEditDialog(true);
-  };
-
-  const handleTogglePublished = async () => {
-    setIsToggling(true);
-    try {
-      const { error } = await toggleProjectPublishedStatus(project.id, !project.is_published);
-      if (error) {
-        showNotification('error', error.message);
-      } else {
-        showNotification('success', `Project ${project.is_published ? 'unpublished' : 'published'} successfully`);
-        onUpdate();
-      }
-    } catch (error) {
-      showNotification('error', 'Failed to update project status');
-    } finally {
-      setIsToggling(false);
-    }
   };
 
   return (
@@ -75,12 +58,11 @@ export function ProjectCard({ project, onDelete, onUpdate }: ProjectCardProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-gray-400 hover:text-blue-400"
-                onClick={handleTogglePublished}
+                onClick={() => handleTogglePublished(project)}
                 disabled={isToggling}
                 title={project.is_published ? 'Unpublish' : 'Publish'}
               >
-                {project.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {project.is_published ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-red-500" />}
               </Button>
               <Button
                 variant="ghost"

@@ -14,13 +14,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNotification } from '@/contexts/NotificationContext';
-import { publishAllProjects } from '@/lib/projects';
+import { publishAllProjects, toggleProjectPublishedStatus } from '@/lib/projects';
 
 export function ProjectsTab() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [publishingAll, setPublishingAll] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const { showNotification } = useNotification();
 
   const fetchProjects = useCallback(async () => {
@@ -65,6 +66,23 @@ export function ProjectsTab() {
     }
   };
 
+  const handleTogglePublished = async (project: Project) => {
+    setTogglingId(project.id);
+    try {
+      const { error } = await toggleProjectPublishedStatus(project.id, !project.is_published);
+      if (error) {
+        showNotification('error', error.message);
+      } else {
+        showNotification('success', `Project ${project.is_published ? 'unpublished' : 'published'} successfully`);
+        fetchProjects();
+      }
+    } catch (error) {
+      showNotification('error', 'Failed to update project status');
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handlePublishAll = async () => {
     setPublishingAll(true);
     try {
@@ -82,33 +100,22 @@ export function ProjectsTab() {
     }
   };
 
-  const unpublishedCount = projects.filter(p => !p.is_published).length;
+  const publishedProjects = projects.filter(p => p.is_published);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-white">Projects</h2>
-        <div className="flex gap-2">
-          {unpublishedCount > 0 && (
-            <Button
-              onClick={handlePublishAll}
-              disabled={publishingAll}
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              <Globe className="mr-2 h-4 w-4" />
-              {publishingAll ? 'Publishing...' : `Publish All (${unpublishedCount})`}
-            </Button>
-          )}
-          <Button
-            onClick={() => setShowAddDialog(true)}
-            className="bg-white text-black hover:bg-gray-100"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Project
-          </Button>
-        </div>
+        <Button
+          onClick={() => setShowAddDialog(true)}
+          className="bg-white text-black hover:bg-gray-100"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add Project
+        </Button>
       </div>
 
+      {/* Published Projects Section */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
@@ -119,9 +126,9 @@ export function ProjectsTab() {
             </div>
           ))}
         </div>
-      ) : projects.length === 0 ? (
+      ) : publishedProjects.length === 0 ? (
         <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-8 text-center">
-          <h3 className="text-white font-medium mb-2">No projects yet</h3>
+          <h3 className="text-white font-medium mb-2">No published projects yet</h3>
           <p className="text-gray-400 text-sm mb-4">
             Get started by adding your first project to your portfolio.
           </p>
@@ -135,14 +142,16 @@ export function ProjectsTab() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
+          {publishedProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              handleTogglePublished={() => handleTogglePublished(project)}
+              isToggling={togglingId === project.id}
               onDelete={handleDelete}
               onUpdate={fetchProjects}
-              />
-            ))}
+            />
+          ))}
         </div>
       )}
 

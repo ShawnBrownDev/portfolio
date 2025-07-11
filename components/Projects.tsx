@@ -110,7 +110,7 @@ const Projects = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -121,6 +121,7 @@ const Projects = () => {
                 <ProjectCard
                   project={project}
                   onViewMore={() => handleViewMore(project)}
+                  isFirst={index === 0}
                 />
               </motion.div>
             ))}

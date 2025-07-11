@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
-import { getAllProjects } from '@/lib/projects';
 
 type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
   project_categories: Array<{
@@ -17,10 +16,46 @@ type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
 export async function GET() {
   try {
     console.log('Fetching all projects from Supabase...');
-    const projects = await getAllProjects();
+    const supabase = createRouteHandlerClient<Database>({ cookies });
+    
+    // Get all projects (including unpublished) with their categories
+    const { data: projects, error: projectsError } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        categories:project_categories(
+          category:categories(
+            id,
+            name,
+            description
+          )
+        )
+      `);
 
-    console.log('Successfully fetched projects:', projects?.length);
-    return NextResponse.json(projects || []);
+    if (projectsError) {
+      console.error('Error fetching all projects:', projectsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch projects' },
+        { status: 500 }
+      );
+    }
+
+    // Transform the data to match our expected format
+    const transformedProjects = projects.map(project => {
+      const categories = project.categories
+        ? project.categories
+            .map((pc: any) => pc.category)
+            .filter(Boolean)
+        : [];
+      const { categories: _, ...projectWithoutCategories } = project;
+      return {
+        ...projectWithoutCategories,
+        categories
+      };
+    });
+
+    console.log('Successfully fetched projects:', transformedProjects?.length);
+    return NextResponse.json(transformedProjects || []);
   } catch (error) {
     console.error('Error in GET /api/projects:', error);
     return NextResponse.json(

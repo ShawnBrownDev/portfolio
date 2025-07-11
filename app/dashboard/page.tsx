@@ -31,7 +31,7 @@ export default function DashboardPage() {
                   Projects
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black">
-                  Settings
+                  Unpublished Projects
                 </TabsTrigger>
               </TabsList>
 
