@@ -14,13 +14,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNotification } from '@/contexts/NotificationContext';
-import { publishAllProjects } from '@/lib/projects';
+import { publishAllProjects, toggleProjectPublishedStatus } from '@/lib/projects';
 
 export function ProjectsTab() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [publishingAll, setPublishingAll] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const { showNotification } = useNotification();
 
   const fetchProjects = useCallback(async () => {
@@ -62,6 +63,23 @@ export function ProjectsTab() {
     } catch (error: any) {
       console.error('Error deleting project:', error);
       showNotification('error', error.message || 'Failed to delete project');
+    }
+  };
+
+  const handleTogglePublished = async (project: Project) => {
+    setTogglingId(project.id);
+    try {
+      const { error } = await toggleProjectPublishedStatus(project.id, !project.is_published);
+      if (error) {
+        showNotification('error', error.message);
+      } else {
+        showNotification('success', `Project ${project.is_published ? 'unpublished' : 'published'} successfully`);
+        fetchProjects();
+      }
+    } catch (error) {
+      showNotification('error', 'Failed to update project status');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -136,13 +154,15 @@ export function ProjectsTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
+            <ProjectCard
+              key={project.id}
+              project={project}
+              handleTogglePublished={() => handleTogglePublished(project)}
+              isToggling={togglingId === project.id}
               onDelete={handleDelete}
               onUpdate={fetchProjects}
-              />
-            ))}
+            />
+          ))}
         </div>
       )}
 

@@ -48,7 +48,6 @@ const ProjectCard = ({ project, onViewMore }: ProjectCardProps) => {
           >
             View More
           </Button>
-          
           <div className="flex gap-2">
             {project.demourl && (
               <a
