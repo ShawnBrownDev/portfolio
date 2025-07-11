@@ -1,16 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { addProject, getCategories, updateProject } from '@/lib/projects';
 import type { Project, Category } from '@/lib/projects';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useNotification } from '@/contexts/NotificationContext';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Upload, Image as ImageIcon, Link } from 'lucide-react';
 import Image from 'next/image';
 import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 
 type ProjectFormData = Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & {
   selectedCategoryIds: string[];
@@ -23,7 +24,7 @@ interface ProjectFormProps {
   mode?: 'create' | 'edit';
 }
 
-const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & { selectedCategoryIds: string[] } = {
+const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at'> & { selectedCategoryIds: string[] } = {
     title: '',
     description: '',
     image: '',
@@ -34,16 +35,24 @@ const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_publ
     impact: null,
     additionalimages: null,
     tags: null,
+    is_published: false,
     selectedCategoryIds: []
 };
 
 export default function ProjectForm({ project, onClose, onSuccess, mode = 'create' }: ProjectFormProps) {
-  const [form, setForm] = useState<ProjectFormData>(initialFormState);
+  const [form, setForm] = useState<ProjectFormData & { is_published: boolean }>(
+    project ? { ...project, selectedCategoryIds: [], is_published: project.is_published ?? false } : { ...initialFormState, is_published: false }
+  );
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageInputMode, setImageInputMode] = useState<'url' | 'upload'>('url');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { showNotification } = useNotification();
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState<null | (() => void)>(null);
 
   // Initialize form with project data if in edit mode
   useEffect(() => {
@@ -79,9 +88,11 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    
-    if (name === 'challenges' || name === 'solutions' || name === 'additionalimages') {
+    const { name, value, type } = e.target;
+    if (name === 'is_published' && type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setForm(prev => ({ ...prev, is_published: checked }));
+    } else if (name === 'challenges' || name === 'solutions' || name === 'additionalimages') {
       setForm(prev => ({
         ...prev,
         [name]: value.split(',').map(item => item.trim()).filter(Boolean)
@@ -100,6 +111,56 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     }));
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showNotification('error', 'Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showNotification('error', 'File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+
+      setForm(prev => ({ ...prev, image: data.url }));
+      showNotification('success', 'Image uploaded successfully!');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      showNotification('error', error.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
   const validateForm = (): boolean => {
     if (!form.title.trim()) {
       showNotification('error', 'Project title is required');
@@ -110,7 +171,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       return false;
     }
     if (!form.image.trim()) {
-      showNotification('error', 'Main image URL is required');
+      showNotification('error', 'Main image is required');
       return false;
     }
     if (form.selectedCategoryIds.length === 0) {
@@ -123,29 +184,26 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setShowPublishDialog(true);
+  };
     
+  const handlePublishChoice = async (publish: boolean) => {
     setLoading(true);
     setError(null);
-
     try {
       const { selectedCategoryIds, ...projectData } = form;
       let error;
-
       if (mode === 'edit' && project) {
-        ({ error } = await updateProject(project.id, projectData, selectedCategoryIds));
+        ({ error } = await updateProject(project.id, { ...projectData, is_published: publish }, selectedCategoryIds));
       } else {
-        ({ error } = await addProject(projectData, selectedCategoryIds));
+        ({ error } = await addProject({ ...projectData, is_published: publish }, selectedCategoryIds));
       }
-      
       if (error) throw error;
-
       showNotification('success', `Project ${mode === 'edit' ? 'updated' : 'added'} successfully!`);
-      
       if (mode === 'create') {
-        setForm(initialFormState);
+        setForm({ ...initialFormState, is_published: false });
         setPreviewImage(null);
       }
-
       if (onSuccess) {
         onSuccess();
       }
@@ -154,6 +212,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       showNotification('error', err.message || `Failed to ${mode} project`);
     } finally {
       setLoading(false);
+      setShowPublishDialog(false);
     }
   };
 
@@ -203,8 +262,35 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         />
       </div>
 
+          {/* Enhanced Image Input */}
       <div>
-            <label className="block text-sm font-medium mb-1 text-white">Main Image URL *</label>
+            <label className="block text-sm font-medium mb-1 text-white">Main Image *</label>
+            
+            {/* Input Mode Toggle */}
+            <div className="flex gap-2 mb-3">
+              <Button
+                type="button"
+                variant={imageInputMode === 'url' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setImageInputMode('url')}
+                className="flex items-center gap-2"
+              >
+                <Link className="h-4 w-4" />
+                URL
+              </Button>
+              <Button
+                type="button"
+                variant={imageInputMode === 'upload' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setImageInputMode('upload')}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Upload
+              </Button>
+            </div>
+
+            {imageInputMode === 'url' ? (
         <input
           name="image"
               placeholder="Enter image URL"
@@ -213,6 +299,39 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
           required
         />
+            ) : (
+              <div className="space-y-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+                <div className="border-2 border-dashed border-[#333] rounded-lg p-6 text-center hover:border-white transition-colors cursor-pointer"
+                     onClick={() => fileInputRef.current?.click()}>
+                  {uploadingImage ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span className="text-white">Uploading...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                      <div className="text-white">
+                        <p className="font-medium">Click to upload image</p>
+                        <p className="text-sm text-gray-400">JPEG, PNG, WebP up to 5MB</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {form.image && imageInputMode === 'upload' && (
+                  <div className="text-sm text-gray-400">
+                    Current image: {form.image.split('/').pop()}
+                  </div>
+                )}
+              </div>
+            )}
       </div>
 
       <div>
@@ -337,7 +456,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             if (onClose) {
               onClose();
             } else {
-              setForm(initialFormState);
+              setForm({ ...initialFormState, is_published: false });
             }
           }}
           disabled={loading}
@@ -359,6 +478,30 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
           )}
       </Button>
       </div>
+
+      {/* Publish confirmation dialog */}
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent className="bg-[#1a1a1a] border border-[#333] text-white">
+          <DialogHeader>
+            <DialogTitle>Publish Project?</DialogTitle>
+          </DialogHeader>
+          <p>Do you want to publish this project immediately? You can always unpublish it later.</p>
+          <DialogFooter className="flex gap-2 justify-end mt-4">
+            <Button
+              variant="outline"
+              onClick={() => handlePublishChoice(false)}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              className="bg-green-600 text-white hover:bg-green-700"
+              onClick={() => handlePublishChoice(true)}
+            >
+              Publish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }
