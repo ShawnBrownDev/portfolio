@@ -157,12 +157,6 @@ export function ProjectsTab() {
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-4xl bg-[#1a1a1a] border border-[#333] text-white">
-          <DialogHeader>
-            <DialogTitle>Add New Project</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Fill in the project details below. Click add when you&apos;re done.
-            </DialogDescription>
-          </DialogHeader>
           <ProjectForm
             mode="create"
             onClose={() => setShowAddDialog(false)}

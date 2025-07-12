@@ -49,11 +49,10 @@ export function SettingsTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-yellow-400 mb-4">Draft Projects</h2>
       {loading ? (
         <div className="text-gray-400">Loading...</div>
       ) : projects.length === 0 ? (
-        <div className="text-gray-400">No draft projects found.</div>
+        <div className="text-gray-400">No unpublished projects found.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
