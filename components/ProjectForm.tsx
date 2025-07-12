@@ -50,6 +50,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageInputMode, setImageInputMode] = useState<'url' | 'upload'>('url');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [additionalImagesInputMode, setAdditionalImagesInputMode] = useState<'url' | 'upload'>('url');
+  const [uploadingAdditionalImages, setUploadingAdditionalImages] = useState(false);
+  const additionalImagesFileInputRef = useRef<HTMLInputElement>(null);
   const { showNotification } = useNotification();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<null | (() => void)>(null);
@@ -92,10 +95,17 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     if (name === 'is_published' && type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setForm(prev => ({ ...prev, is_published: checked }));
-    } else if (name === 'challenges' || name === 'solutions' || name === 'additionalimages') {
+    } else if (name === 'challenges' || name === 'solutions') {
       setForm(prev => ({
         ...prev,
         [name]: value.split(',').map(item => item.trim()).filter(Boolean)
+      }));
+    } else if (name === 'additionalimages') {
+      // Handle additional images as comma-separated URLs
+      const urls = value.split(',').map(item => item.trim()).filter(Boolean);
+      setForm(prev => ({
+        ...prev,
+        additionalimages: urls.length > 0 ? urls : null
       }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
@@ -154,10 +164,73 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     }
   };
 
+  const handleAdditionalImagesUpload = async (files: FileList) => {
+    if (!files || files.length === 0) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    // Validate all files
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!allowedTypes.includes(file.type)) {
+        showNotification('error', `Invalid file type for ${file.name}. Only JPEG, PNG, and WebP images are allowed.`);
+        return;
+      }
+      if (file.size > maxSize) {
+        showNotification('error', `File ${file.name} is too large. Maximum size is 5MB.`);
+        return;
+      }
+    }
+
+    setUploadingAdditionalImages(true);
+    try {
+      const uploadedUrls: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `Failed to upload ${file.name}`);
+        }
+
+        uploadedUrls.push(data.url);
+      }
+
+      const currentImages = form.additionalimages || [];
+      setForm(prev => ({ 
+        ...prev, 
+        additionalimages: [...currentImages, ...uploadedUrls]
+      }));
+      showNotification('success', `${files.length} image(s) uploaded successfully!`);
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      showNotification('error', error.message || 'Failed to upload images');
+    } finally {
+      setUploadingAdditionalImages(false);
+    }
+  };
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       handleFileUpload(file);
+    }
+  };
+
+  const handleAdditionalImagesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleAdditionalImagesUpload(files);
     }
   };
 
@@ -192,6 +265,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     setError(null);
     try {
       const { selectedCategoryIds, ...projectData } = form;
+      
+
+      
       let error;
       if (mode === 'edit' && project) {
         ({ error } = await updateProject(project.id, { ...projectData, is_published: publish }, selectedCategoryIds));
@@ -203,6 +279,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       if (mode === 'create') {
         setForm({ ...initialFormState, is_published: false });
         setPreviewImage(null);
+        setAdditionalImagesInputMode('url');
       }
       if (onSuccess) {
         onSuccess();
@@ -218,23 +295,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">
-          {mode === 'edit' ? 'Edit Project' : 'Add New Project'}
-        </h2>
-        {onClose && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-gray-400 hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left column - Form inputs */}
         <div className="space-y-4">
@@ -421,13 +481,109 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
 
       <div>
             <label className="block text-sm font-medium mb-1 text-white">Additional Images</label>
-        <input
-          name="additionalimages"
-              placeholder="Additional image URLs (comma-separated)"
-          value={form.additionalimages?.join(', ') || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-            />
+            
+            {/* Input Mode Toggle */}
+            <div className="flex gap-2 mb-3">
+              <Button
+                type="button"
+                variant={additionalImagesInputMode === 'url' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setAdditionalImagesInputMode('url')}
+                className="flex items-center gap-2"
+              >
+                <Link className="h-4 w-4" />
+                URL
+              </Button>
+              <Button
+                type="button"
+                variant={additionalImagesInputMode === 'upload' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setAdditionalImagesInputMode('upload')}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Upload
+              </Button>
+            </div>
+
+            {additionalImagesInputMode === 'url' ? (
+              <input
+                name="additionalimages"
+                placeholder="Additional image URLs (comma-separated)"
+                value={form.additionalimages?.join(', ') || ''}
+                onChange={handleChange}
+                className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+              />
+            ) : (
+              <div className="space-y-3">
+                <input
+                  ref={additionalImagesFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleAdditionalImagesInputChange}
+                  className="hidden"
+                />
+                <div className="border-2 border-dashed border-[#333] rounded-lg p-6 text-center hover:border-white transition-colors cursor-pointer"
+                     onClick={() => additionalImagesFileInputRef.current?.click()}>
+                  {uploadingAdditionalImages ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span className="text-white">Uploading...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                      <div className="text-white">
+                        <p className="font-medium">Click to upload images</p>
+                        <p className="text-sm text-gray-400">JPEG, PNG, WebP up to 5MB each</p>
+                        <p className="text-xs text-gray-500">You can select multiple files</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {form.additionalimages && form.additionalimages.length > 0 && additionalImagesInputMode === 'upload' && (
+                  <div className="text-sm text-gray-400">
+                    Current images: {form.additionalimages.length} uploaded
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Display current additional images */}
+            {form.additionalimages && form.additionalimages.length > 0 && (
+              <div className="mt-3">
+                <label className="block text-sm font-medium mb-2 text-white">Current Additional Images</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {form.additionalimages.map((imageUrl, index) => (
+                    <div key={index} className="relative group">
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
+                        <Image
+                          src={imageUrl}
+                          alt={`Additional image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newImages = form.additionalimages?.filter((_, i) => i !== index) || [];
+                          setForm(prev => ({ 
+                            ...prev, 
+                            additionalimages: newImages.length > 0 ? newImages : null 
+                          }));
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Image preview */}
@@ -457,6 +613,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
               onClose();
             } else {
               setForm({ ...initialFormState, is_published: false });
+              setAdditionalImagesInputMode('url');
             }
           }}
           disabled={loading}
