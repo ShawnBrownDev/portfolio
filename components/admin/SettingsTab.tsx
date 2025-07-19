@@ -47,6 +47,24 @@ export function SettingsTab() {
     }
   };
 
+  // Add handleDelete for deleting a project
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/projects/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete project');
+      }
+      showNotification('success', 'Project deleted successfully');
+      fetchProjects();
+    } catch (error: any) {
+      console.error('Error deleting project:', error);
+      showNotification('error', error.message || 'Failed to delete project');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {loading ? (
@@ -61,7 +79,7 @@ export function SettingsTab() {
               project={project}
               handleTogglePublished={() => handleTogglePublished(project)}
               isToggling={togglingId === project.id}
-              onDelete={fetchProjects}
+              onDelete={handleDelete}
               onUpdate={fetchProjects}
             />
           ))}
