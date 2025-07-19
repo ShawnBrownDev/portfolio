@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Project } from '../lib/projects';
 import { X, ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { Dialog, DialogContent } from './ui/dialog';
 
 interface ProjectModalProps {
   project: Project;
@@ -13,6 +14,7 @@ interface ProjectModalProps {
 const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
   const allImages = [project.image, ...(project.additionalimages || [])];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
@@ -22,10 +24,8 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
   };
 
-  // Placeholder for image click to pop out
   const handleImageClick = () => {
-    // Implement lightbox or larger view here later
-    console.log('Image clicked:', allImages[currentImageIndex]);
+    setLightboxOpen(true);
   };
 
   return (
@@ -47,9 +47,18 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             src={allImages[currentImageIndex]}
             alt={`${project.title} image ${currentImageIndex + 1}`}
             fill
-            className="object-cover cursor-pointer"
-            onClick={handleImageClick}
+            className="object-cover"
           />
+          {/* Hoverable Lightbox Icon */}
+          <button
+            type="button"
+            onClick={handleImageClick}
+            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 hover:bg-black/30"
+            style={{ pointerEvents: 'auto' }}
+            aria-label="View full image"
+          >
+            <ExternalLink className="h-10 w-10 text-white drop-shadow-lg" />
+          </button>
 
           {/* Navigation Arrows */}
           {allImages.length > 1 && (
@@ -71,6 +80,18 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             </>
           )}
         </div>
+
+        {/* Lightbox Modal */}
+        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+          <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-0 max-w-3xl">
+            <img
+              src={allImages[currentImageIndex]}
+              alt="Full size preview"
+              className="max-h-[80vh] max-w-[90vw] rounded-lg object-contain"
+              style={{ background: 'black' }}
+            />
+          </DialogContent>
+        </Dialog>
 
         <p className="text-gray-300 mb-4">{project.description}</p>
 
