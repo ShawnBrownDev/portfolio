@@ -42,7 +42,7 @@ const Projects = () => {
 
   const filteredProjects = selectedCategory === 'all'
     ? projects
-        : projects.filter((project: Project) => 
+        : projects.filter((project: Project & { categories: Category[] }) => 
             project.categories.some((category: Category) => category.id === selectedCategory)
       );
 

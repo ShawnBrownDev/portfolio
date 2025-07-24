@@ -28,13 +28,15 @@ const ProjectCard = ({
   return (
     <div className="group relative bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
-        <Image
-          src={project.image}
-          alt={project.title}
-          fill
-          priority={isFirst}
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {project.image && (
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            priority={isFirst}
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        )}
         {/* Draft badge and publish icon */}
         {!project.is_published && (
           <div className="absolute top-2 left-2 flex items-center gap-2 z-10">

@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 
 type ProjectFormData = Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & {
   selectedCategoryIds: string[];
+  is_published: boolean;
 };
 
 interface ProjectFormProps {
@@ -40,8 +41,14 @@ const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at'> & { selec
 };
 
 export default function ProjectForm({ project, onClose, onSuccess, mode = 'create' }: ProjectFormProps) {
-  const [form, setForm] = useState<ProjectFormData & { is_published: boolean }>(
-    project ? { ...project, selectedCategoryIds: [], is_published: project.is_published ?? false } : { ...initialFormState, is_published: false }
+  const [form, setForm] = useState<ProjectFormData>(
+    project ? { 
+      ...project, 
+      selectedCategoryIds: [], 
+      is_published: project.is_published ?? false,
+      description: project.description || '',
+      image: project.image || ''
+    } : { ...initialFormState, is_published: false }
   );
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,6 +70,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       setForm({
         ...project,
         selectedCategoryIds: [], // You'll need to map the categories from your project data
+        is_published: project.is_published ?? false,
+        description: project.description || '',
+        image: project.image || ''
       });
       setPreviewImage(project.image);
     }
@@ -239,11 +249,11 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       showNotification('error', 'Project title is required');
       return false;
     }
-    if (!form.description.trim()) {
+    if (!form.description?.trim()) {
       showNotification('error', 'Project description is required');
       return false;
     }
-    if (!form.image.trim()) {
+    if (!form.image?.trim()) {
       showNotification('error', 'Main image is required');
       return false;
     }
@@ -315,7 +325,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         <textarea
           name="description"
               placeholder="Describe your project"
-          value={form.description}
+          value={form.description || ''}
           onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[120px]"
           required
@@ -354,7 +364,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         <input
           name="image"
               placeholder="Enter image URL"
-          value={form.image}
+          value={form.image || ''}
           onChange={handleChange}
               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
           required

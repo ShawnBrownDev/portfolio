@@ -43,12 +43,14 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {/* Image Gallery */}
         <div className="mb-4 relative h-48 sm:h-64 w-full rounded-md overflow-hidden group">
-          <Image 
-            src={allImages[currentImageIndex]}
-            alt={`${project.title} image ${currentImageIndex + 1}`}
-            fill
-            className="object-cover"
-          />
+          {allImages[currentImageIndex] && (
+            <Image
+              src={allImages[currentImageIndex] as string}
+              alt={`${project.title} image ${currentImageIndex + 1}`}
+              fill
+              className="object-cover"
+            />
+          )}
           {/* Hoverable Lightbox Icon */}
           <button
             type="button"
@@ -85,14 +87,18 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl">
             <div className="relative max-h-[85vh] max-w-[90vw] rounded-lg overflow-hidden" style={{ background: 'black' }}>
-              <Image
-                src={allImages[currentImageIndex]}
-                alt="Full size preview"
-                width={800}
-                height={600}
-                className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+              {allImages[currentImageIndex] && (
+                <Image
+                  src={allImages[currentImageIndex] as string}
+                  alt="Full size preview"
+                  width={800}
+                  height={600}
+                  className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+                  priority
+                />
+              )}
                 priority
-              />
+              
             </div>
           </DialogContent>
         </Dialog>
