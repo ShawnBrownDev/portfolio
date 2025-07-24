@@ -555,7 +555,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
               <div className="mt-3">
                 <label className="block text-sm font-medium mb-2 text-white">Current Additional Images</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {form.additionalimages.map((imageUrl, index) => (
+                  {form.additionalimages.map((imageUrl: string, index: number) => (
                     <div key={index} className="relative group">
                       <div className="relative w-full h-20 sm:h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
                         <Image
@@ -569,7 +569,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                       <button
                         type="button"
                         onClick={() => {
-                          const newImages = form.additionalimages?.filter((_, i) => i !== index) || [];
+                          const newImages = form.additionalimages?.filter((_: string, i: number) => i !== index) || [];
                           setForm(prev => ({ 
                             ...prev, 
                             additionalimages: newImages.length > 0 ? newImages : null 
