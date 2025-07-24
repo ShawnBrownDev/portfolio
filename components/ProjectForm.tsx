@@ -295,7 +295,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left column - Form inputs */}
         <div className="space-y-4">
       <div>
@@ -327,15 +327,15 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <label className="block text-sm font-medium mb-1 text-white">Main Image *</label>
             
             {/* Input Mode Toggle */}
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-3">
               <Button
                 type="button"
                 variant={imageInputMode === 'url' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setImageInputMode('url')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
-                <Link className="h-4 w-4" />
+                <Link className="h-3 w-3 sm:h-4 sm:w-4" />
                 URL
               </Button>
               <Button
@@ -343,9 +343,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                 variant={imageInputMode === 'upload' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setImageInputMode('upload')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
                 Upload
               </Button>
             </div>
@@ -368,7 +368,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
-                <div className="border-2 border-dashed border-[#333] rounded-lg p-6 text-center hover:border-white transition-colors cursor-pointer"
+                <div className="border-2 border-dashed border-[#333] rounded-lg p-4 sm:p-6 text-center hover:border-white transition-colors cursor-pointer"
                      onClick={() => fileInputRef.current?.click()}>
                   {uploadingImage ? (
                     <div className="flex items-center justify-center gap-2">
@@ -377,10 +377,10 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                      <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-gray-400" />
                       <div className="text-white">
-                        <p className="font-medium">Click to upload image</p>
-                        <p className="text-sm text-gray-400">JPEG, PNG, WebP up to 5MB</p>
+                        <p className="font-medium text-sm sm:text-base">Click to upload image</p>
+                        <p className="text-xs sm:text-sm text-gray-400">JPEG, PNG, WebP up to 5MB</p>
                       </div>
                     </div>
                   )}
@@ -401,7 +401,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <Badge
               key={category.id}
               variant={form.selectedCategoryIds.includes(category.id) ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-[#333] transition-colors"
+                  className="cursor-pointer hover:bg-[#333] transition-colors text-xs sm:text-sm"
               onClick={() => toggleCategory(category.id)}
             >
               {category.name}
@@ -420,7 +420,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         />
       </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
               <label className="block text-sm font-medium mb-1 text-white">Demo URL</label>
         <input
@@ -483,15 +483,15 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <label className="block text-sm font-medium mb-1 text-white">Additional Images</label>
             
             {/* Input Mode Toggle */}
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-3">
               <Button
                 type="button"
                 variant={additionalImagesInputMode === 'url' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setAdditionalImagesInputMode('url')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
-                <Link className="h-4 w-4" />
+                <Link className="h-3 w-3 sm:h-4 sm:w-4" />
                 URL
               </Button>
               <Button
@@ -499,9 +499,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                 variant={additionalImagesInputMode === 'upload' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setAdditionalImagesInputMode('upload')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
                 Upload
               </Button>
             </div>
@@ -524,7 +524,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   onChange={handleAdditionalImagesInputChange}
                   className="hidden"
                 />
-                <div className="border-2 border-dashed border-[#333] rounded-lg p-6 text-center hover:border-white transition-colors cursor-pointer"
+                <div className="border-2 border-dashed border-[#333] rounded-lg p-4 sm:p-6 text-center hover:border-white transition-colors cursor-pointer"
                      onClick={() => additionalImagesFileInputRef.current?.click()}>
                   {uploadingAdditionalImages ? (
                     <div className="flex items-center justify-center gap-2">
@@ -533,10 +533,10 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                      <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-gray-400" />
                       <div className="text-white">
-                        <p className="font-medium">Click to upload images</p>
-                        <p className="text-sm text-gray-400">JPEG, PNG, WebP up to 5MB each</p>
+                        <p className="font-medium text-sm sm:text-base">Click to upload images</p>
+                        <p className="text-xs sm:text-sm text-gray-400">JPEG, PNG, WebP up to 5MB each</p>
                         <p className="text-xs text-gray-500">You can select multiple files</p>
                       </div>
                     </div>
@@ -554,10 +554,10 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             {form.additionalimages && form.additionalimages.length > 0 && (
               <div className="mt-3">
                 <label className="block text-sm font-medium mb-2 text-white">Current Additional Images</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {form.additionalimages.map((imageUrl, index) => (
                     <div key={index} className="relative group">
-                      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
+                      <div className="relative w-full h-20 sm:h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
                         <Image
                           src={imageUrl}
                           alt={`Additional image ${index + 1}`}
@@ -575,7 +575,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                             additionalimages: newImages.length > 0 ? newImages : null 
                           }));
                         }}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -590,7 +590,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
           {previewImage && (
             <div className="mt-4">
               <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
-              <div className="relative w-full h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
+              <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
                 <Image
                   src={previewImage}
                   alt="Preview"
@@ -604,7 +604,7 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-6">
+      <div className="flex flex-col sm:flex-row justify-end gap-4 mt-6">
         <Button
           type="button"
           variant="outline"
@@ -613,17 +613,17 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
               onClose();
             } else {
               setForm({ ...initialFormState, is_published: false });
-              setAdditionalImagesInputMode('url');
             }
           }}
           disabled={loading}
+          className="w-full sm:w-auto"
         >
           {onClose ? 'Cancel' : 'Clear Form'}
         </Button>
       <Button
         type="submit"
         disabled={loading}
-          className="bg-white text-black hover:bg-gray-100"
+          className="bg-white text-black hover:bg-gray-100 w-full sm:w-auto"
       >
           {loading ? (
             <>
