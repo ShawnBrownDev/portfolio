@@ -16,21 +16,21 @@ export default function DashboardPage() {
     <NotificationProvider>
       <div className="min-h-screen bg-black">
         <Navbar supabase={supabase} />
-        <div className="p-8">
-          <div className="max-w-7xl mx-auto space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-4 sm:p-8">
+          <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <UserInfoCard />
-              <div className="md:col-span-2">
+              <div className="lg:col-span-2">
                 <StatsCard />
               </div>
             </div>
 
-            <Tabs defaultValue="projects" className="space-y-6">
-              <TabsList className="bg-[#1a1a1a] border border-[#333]">
-                <TabsTrigger value="projects" className="data-[state=active]:bg-white data-[state=active]:text-black">
+            <Tabs defaultValue="projects" className="space-y-4 sm:space-y-6">
+              <TabsList className="bg-[#1a1a1a] border border-[#333] w-full sm:w-auto">
+                <TabsTrigger value="projects" className="data-[state=active]:bg-white data-[state=active]:text-black flex-1 sm:flex-none">
                   Projects
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black">
+                <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black flex-1 sm:flex-none">
                   Unpublished Projects
                 </TabsTrigger>
               </TabsList>

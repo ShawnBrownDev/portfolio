@@ -51,47 +51,48 @@ export function ProjectCard({ project, handleTogglePublished, isToggling, onDele
             </div>
           )}
       </div>
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
         <div className="flex items-start justify-between">
-            <h3 className="text-lg font-semibold text-white mb-2">{project.title}</h3>
-            <div className="flex gap-2">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-2 pr-2">{project.title}</h3>
+            <div className="flex gap-1 sm:gap-2 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleTogglePublished(project)}
                 disabled={isToggling}
                 title={project.is_published ? 'Unpublish' : 'Publish'}
+                className="h-7 w-7 sm:h-8 sm:w-8"
               >
-                {project.is_published ? <Eye className="h-4 w-4 text-green-500" /> : <EyeOff className="h-4 w-4 text-red-500" />}
+                {project.is_published ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" /> : <EyeOff className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />}
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-gray-400 hover:text-white"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-gray-400 hover:text-white"
                 onClick={handleEdit}
             >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-gray-400 hover:text-red-400"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-gray-400 hover:text-red-400"
               onClick={() => onDelete(project.id)}
             >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
-          <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">
             {project.description}
           </p>
         {project.tags && project.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
               {project.tags.map((tag, index) => (
                 <Badge
                 key={index}
                   variant="secondary"
-                  className="bg-[#333] text-white"
+                  className="bg-[#333] text-white text-xs"
               >
                 {tag}
                 </Badge>

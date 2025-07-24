@@ -1,21 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, useInView, AnimatePresence } from 'framer-motion';
-import { FaJs, FaReact, FaNodeJs, FaDocker } from 'react-icons/fa';
-import { SiTypescript, SiSupabase, SiPostgresql, SiNextdotjs } from 'react-icons/si';
-import { IconType } from 'react-icons';
-import { skills, Skill } from '@/lib/skills';
+import { useRef, useEffect, useState } from 'react';
+import { skills, Skill, Category } from '@/lib/skills';
 
 const AnimatedSkills = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const controls = useAnimation();
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
     if (isInView) {
-      controls.start('visible');
+      controls.start("visible");
     }
   }, [controls, isInView]);
 
@@ -24,16 +22,20 @@ const AnimatedSkills = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-      },
-    },
+        staggerChildren: 0.1
+      }
+    }
   };
 
   const itemVariants = {
-    hidden: { 
-      y: 20, 
+    hidden: {
+      y: 20,
       opacity: 0,
-      scale: 0.95
+      scale: 0.95,
+      transition: {
+        duration: 0.3,
+        ease: "easeIn"
+      }
     },
     visible: {
       y: 0,
@@ -58,11 +60,11 @@ const AnimatedSkills = () => {
   const filteredSkills = selectedCategory === 'all' 
     ? skills 
     : skills.filter((skill: Skill) => 
-        skill.category.includes(selectedCategory as 'frontend' | 'backend' | 'database' | 'devops')
+        skill.category.includes(selectedCategory as Category)
       );
 
   return (
-    <section className="py-20">
+    <section id="skills" className="py-20">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -74,20 +76,28 @@ const AnimatedSkills = () => {
           <p className="text-gray-400">Comprehensive development capabilities across the entire stack</p>
         </motion.div>
 
-        <div className="flex justify-center gap-4 mb-12">
-          {['all', 'frontend', 'backend', 'database', 'devops'].map((category) => (
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-12 px-4">
+          {[
+            { id: 'all', label: 'All Skills' },
+            { id: 'frontend', label: 'Frontend' },
+            { id: 'backend', label: 'Backend' },
+            { id: 'database', label: 'Database' },
+            { id: 'mobile', label: 'Mobile' },
+            { id: 'devops', label: 'DevOps' },
+            { id: 'tools', label: 'Tools' }
+          ].map((category) => (
             <motion.button
-              key={category}
+              key={category.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCategory === category
+              onClick={() => setSelectedCategory(category.id as Category | 'all')}
+              className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                selectedCategory === category.id
                   ? 'bg-white text-gray-800'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
+              {category.label}
             </motion.button>
           ))}
         </div>

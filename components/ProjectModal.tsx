@@ -29,20 +29,20 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-gray-800 rounded-lg p-6 max-w-3xl w-full relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 w-full max-w-3xl mx-auto relative max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 text-gray-400 hover:text-white z-10 p-1"
           aria-label="Close modal"
         >
-          <X size={24} />
+          <X size={20} className="sm:w-6 sm:h-6" />
         </button>
 
-        <h3 className="text-2xl font-bold mb-4 text-white">{project.title}</h3>
+        <h3 className="text-xl sm:text-2xl font-bold mb-4 text-white pr-8">{project.title}</h3>
 
         {/* Image Gallery */}
-        <div className="mb-4 relative h-64 w-full rounded-md overflow-hidden group">
+        <div className="mb-4 relative h-48 sm:h-64 w-full rounded-md overflow-hidden group">
           <Image 
             src={allImages[currentImageIndex]}
             alt={`${project.title} image ${currentImageIndex + 1}`}
@@ -57,7 +57,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             style={{ pointerEvents: 'auto' }}
             aria-label="View full image"
           >
-            <ExternalLink className="h-10 w-10 text-white drop-shadow-lg" />
+            <ExternalLink className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
           </button>
 
           {/* Navigation Arrows */}
@@ -65,17 +65,17 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             <>
               <button
                 onClick={handlePreviousImage}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 sm:p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 aria-label="Previous image"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={handleNextImage}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1 sm:p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 aria-label="Next image"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={16} className="sm:w-5 sm:h-5" />
               </button>
             </>
           )}
@@ -83,19 +83,23 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {/* Lightbox Modal */}
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-          <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-0 max-w-3xl">
-            <img
-              src={allImages[currentImageIndex]}
-              alt="Full size preview"
-              className="max-h-[80vh] max-w-[90vw] rounded-lg object-contain"
-              style={{ background: 'black' }}
-            />
+          <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl">
+            <div className="relative max-h-[85vh] max-w-[90vw] rounded-lg overflow-hidden" style={{ background: 'black' }}>
+              <Image
+                src={allImages[currentImageIndex]}
+                alt="Full size preview"
+                width={800}
+                height={600}
+                className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+                priority
+              />
+            </div>
           </DialogContent>
         </Dialog>
 
-        <p className="text-gray-300 mb-4">{project.description}</p>
+        <p className="text-sm sm:text-base text-gray-300 mb-4">{project.description}</p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
           {project.tags?.map((tag, index) => (
             <span
               key={index}
@@ -108,8 +112,8 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {project.challenges && project.challenges.length > 0 && (
           <div className="mb-4">
-            <h4 className="text-lg font-semibold mb-2 text-white">Challenges:</h4>
-            <ul className="list-disc list-inside text-gray-400">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 text-white">Challenges:</h4>
+            <ul className="list-disc list-inside text-sm sm:text-base text-gray-400 space-y-1">
               {project.challenges.map((challenge, index) => (
                 <li key={index}>{challenge}</li>
               ))}
@@ -119,8 +123,8 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {project.solutions && project.solutions.length > 0 && (
           <div className="mb-4">
-            <h4 className="text-lg font-semibold mb-2 text-white">Solutions:</h4>
-            <ul className="list-disc list-inside text-gray-400">
+            <h4 className="text-base sm:text-lg font-semibold mb-2 text-white">Solutions:</h4>
+            <ul className="list-disc list-inside text-sm sm:text-base text-gray-400 space-y-1">
               {project.solutions.map((solution, index) => (
                 <li key={index}>{solution}</li>
               ))}
@@ -130,18 +134,18 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {project.impact && (
           <div className="mb-4">
-            <h4 className="text-lg font-semibold mb-2 text-white">Impact:</h4>
-            <p className="text-gray-400">{project.impact}</p>
+            <h4 className="text-base sm:text-lg font-semibold mb-2 text-white">Impact:</h4>
+            <p className="text-sm sm:text-base text-gray-400">{project.impact}</p>
           </div>
         )}
 
-        <div className="flex gap-3 mt-6 justify-end">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-end">
           {project.demourl && (
             <a
               href={project.demourl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90 w-full sm:w-auto"
             >
               <ExternalLink className="mr-2 h-4 w-4" />
               Live Demo
@@ -153,7 +157,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
               href={project.githuburl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border border-input bg-transparent rounded-md hover:bg-accent hover:text-accent-foreground"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border border-input bg-transparent rounded-md hover:bg-accent hover:text-accent-foreground w-full sm:w-auto"
             >
               <Github className="mr-2 h-4 w-4" />
               GitHub
