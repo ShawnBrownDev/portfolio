@@ -22,6 +22,42 @@ interface ContributionData {
   };
 }
 
+interface GitHubProfile {
+  login: string;
+  name: string;
+  bio: string;
+  public_repos: number;
+  followers: number;
+  following: number;
+  created_at: string;
+  avatar_url: string;
+}
+
+interface GitHubRepo {
+  id: number;
+  name: string;
+  description: string;
+  language: string;
+  stargazers_count: number;
+  forks_count: number;
+  updated_at: string;
+  html_url: string;
+}
+
+interface GitHubCommit {
+  sha: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      date: string;
+    };
+  };
+  repository: {
+    name: string;
+  };
+}
+
 interface TerminalOutput {
   type: 'command' | 'output' | 'error';
   text: string | JSX.Element;
@@ -29,6 +65,9 @@ interface TerminalOutput {
 
 const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username }) => {
   const [contributionData, setContributionData] = useState<ContributionData | null>(null);
+  const [profileData, setProfileData] = useState<GitHubProfile | null>(null);
+  const [reposData, setReposData] = useState<GitHubRepo[]>([]);
+  const [recentCommits, setRecentCommits] = useState<GitHubCommit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState<string>('');
@@ -45,6 +84,8 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   // Add initial message on component mount, only once
   useEffect(() => {
@@ -56,7 +97,77 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     }
   }, [isInstalled]);
 
+  // Auto-refresh GitHub data every 5 minutes if enabled
+  useEffect(() => {
+    if (!autoRefresh || !isInstalled) return;
+
+    const interval = setInterval(async () => {
+      setOutput(prev => [...prev, { type: 'output', text: '🔄 Auto-refreshing GitHub data...' }]);
+      await fetchAllGitHubData();
+      setLastRefresh(new Date());
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, isInstalled]);
+
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const fetchGitHubProfile = async (): Promise<GitHubProfile | null> => {
+    try {
+      const response = await fetch(`https://api.github.com/users/${username}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setProfileData(data);
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch GitHub profile:', error);
+      return null;
+    }
+  };
+
+  const fetchGitHubRepos = async (): Promise<GitHubRepo[]> => {
+    try {
+      const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setReposData(data);
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch GitHub repos:', error);
+      return [];
+    }
+  };
+
+  const fetchRecentCommits = async (): Promise<GitHubCommit[]> => {
+    try {
+      // Note: This is a simplified approach. GitHub API requires authentication for user events
+      // For now, we'll show a message about this limitation
+      setOutput(prev => [...prev, { 
+        type: 'output', 
+        text: 'Note: Recent commits require GitHub authentication. Use "profile" to see public data.' 
+      }]);
+      return [];
+    } catch (error) {
+      console.error('Failed to fetch recent commits:', error);
+      return [];
+    }
+  };
+
+  const fetchAllGitHubData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchContributions(),
+        fetchGitHubProfile(),
+        fetchGitHubRepos(),
+        fetchRecentCommits()
+      ]);
+    } catch (error) {
+      console.error('Failed to fetch GitHub data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const simulateInstall = async () => {
     setOutput(prev => [
@@ -65,6 +176,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     ]);
 
     let loadingInterval: NodeJS.Timeout;
+    let currentProgress = 0;
 
     try {
       // Start loading animation
@@ -72,55 +184,50 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
         setLoadingFrame(prev => (prev + 1) % LOADING_FRAMES.length);
       }, 80);
 
+      // Show initial progress bar
+      setOutput(prev => [
+        ...prev,
+        { type: 'output', text: `${LOADING_FRAMES[loadingFrame]} Installing...` },
+        { type: 'output', text: createProgressBar(0) }
+      ]);
+
       // Process each installation step
       for (let i = 0; i < INSTALL_STEPS.length; i++) {
         const step = INSTALL_STEPS[i];
-        const stepProgress = (i / INSTALL_STEPS.length) * 100;
         
-        // Show step start
-        setOutput(prev => [
-          ...prev,
-          { type: 'output', text: `\n${LOADING_FRAMES[loadingFrame]} ${step.name}...` },
-          { type: 'output', text: createProgressBar(stepProgress) }
-        ]);
-
         // Process sub-steps
         for (const detail of step.details) {
           await sleep(step.duration / step.details.length);
-          setOutput(prev => [
-            ...prev,
-            { type: 'output', text: `  → ${detail}` }
-          ]);
+          currentProgress = ((i * step.details.length + step.details.indexOf(detail) + 1) / 
+                           (INSTALL_STEPS.reduce((sum, s) => sum + s.details.length, 0))) * 100;
+          
+          // Update progress bar
+          setOutput(prev => {
+            const newOutput = [...prev];
+            // Update the progress bar line
+            newOutput[newOutput.length - 1] = { type: 'output', text: createProgressBar(Math.floor(currentProgress)) };
+            return newOutput;
+          });
         }
-
-        // Update with completion status
-        setOutput(prev => [
-          ...prev,
-          { type: 'output', text: `✓ ${step.name} completed` }
-        ]);
       }
 
       // Clear interval and show completion
       clearInterval(loadingInterval);
       setIsCompleting(true);
 
-      // Show final progress
-      setOutput(prev => [
-        ...prev,
-        { type: 'output', text: createProgressBar(100) },
-        { type: 'output', text: '\n🎉 Installation complete! Available commands:' },
-        { type: 'output', text: '\n📊 Core Commands:' },
-        { type: 'output', text: '  • github    - Display GitHub contribution graph' },
-        { type: 'output', text: '  • stats     - Show detailed contribution statistics' },
-        { type: 'output', text: '  • summary   - Quick overview of recent contributions' },
-        { type: 'output', text: '\n🎨 Customization:' },
-        { type: 'output', text: '  • theme     - Show/change current theme settings' },
-        { type: 'output', text: '\n🔧 Utilities:' },
-        { type: 'output', text: '  • ask       - List available questions or ask specific ones' },
-        { type: 'output', text: '  • clear     - Clear the terminal output' },
-        { type: 'output', text: '  • history   - Show command history' },
-        { type: 'output', text: '\nType `help` to see this list again.\n' }
-      ]);
+      // Update final progress and show completion
+      setOutput(prev => {
+        const newOutput = [...prev];
+        // Update the progress bar to 100%
+        newOutput[newOutput.length - 1] = { type: 'output', text: createProgressBar(100) };
+        // Add completion message
+        newOutput.push(
+          { type: 'output', text: '\n✅ Installation complete!' },
+          { type: 'output', text: '\nAvailable commands: github, profile, repos, stats, summary, refresh, auto, theme, help' },
+          { type: 'output', text: 'Type `help` for detailed command list.\n' }
+        );
+        return newOutput;
+      });
 
       // Small delay before setting installed
       await sleep(100);
@@ -229,6 +336,14 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     return { last30Days, thisYear };
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   const handleCommand = async (command: string) => {
     setOutput(prev => [...prev, { type: 'command', text: `$ ${command}` }]);
     setInput('');
@@ -278,6 +393,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
         } else {
           const categorizedCommands = {
             core: COMMANDS.filter(cmd => cmd.category === 'core'),
+            realtime: COMMANDS.filter(cmd => cmd.category === 'realtime'),
             customization: COMMANDS.filter(cmd => cmd.category === 'customization'),
             utility: COMMANDS.filter(cmd => cmd.category === 'utility')
           };
@@ -286,6 +402,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
             { type: 'output', text: '🚀 Available Commands:' },
             { type: 'output', text: '\n📊 Core Commands:' },
             ...categorizedCommands.core.map(cmd => ({
+              type: 'output' as const,
+              text: `  • ${cmd.name.padEnd(8)} - ${cmd.description}`
+            })),
+            { type: 'output', text: '\n🔄 Real-time Features:' },
+            ...categorizedCommands.realtime.map(cmd => ({
               type: 'output' as const,
               text: `  • ${cmd.name.padEnd(8)} - ${cmd.description}`
             })),
@@ -330,7 +451,86 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
                   setOutput(prev => [...prev, { type: 'output', text: renderContributionGrid(data.contributions) }]);
              }
         }
-        break; // Added missing break
+        break;
+      case 'profile':
+        if (profileData) {
+          setOutput(prev => [
+            ...prev,
+            { type: 'output', text: '👤 GitHub Profile:' },
+            { type: 'output', text: `Name: ${profileData.name || 'Not set'}` },
+            { type: 'output', text: `Username: @${profileData.login}` },
+            { type: 'output', text: `Bio: ${profileData.bio || 'No bio set'}` },
+            { type: 'output', text: `Public Repos: ${profileData.public_repos}` },
+            { type: 'output', text: `Followers: ${profileData.followers}` },
+            { type: 'output', text: `Following: ${profileData.following}` },
+            { type: 'output', text: `Member since: ${formatDate(profileData.created_at)}` }
+          ]);
+        } else {
+          setOutput(prev => [...prev, { type: 'output', text: 'Fetching GitHub profile...' }]);
+          const data = await fetchGitHubProfile();
+          if (data) {
+            setOutput(prev => [
+              ...prev,
+              { type: 'output', text: '👤 GitHub Profile:' },
+              { type: 'output', text: `Name: ${data.name || 'Not set'}` },
+              { type: 'output', text: `Username: @${data.login}` },
+              { type: 'output', text: `Bio: ${data.bio || 'No bio set'}` },
+              { type: 'output', text: `Public Repos: ${data.public_repos}` },
+              { type: 'output', text: `Followers: ${data.followers}` },
+              { type: 'output', text: `Following: ${data.following}` },
+              { type: 'output', text: `Member since: ${formatDate(data.created_at)}` }
+            ]);
+          }
+        }
+        break;
+      case 'repos':
+        if (reposData.length > 0) {
+          setOutput(prev => [
+            ...prev,
+            { type: 'output', text: '📚 Recent Repositories:' }
+          ]);
+          
+          reposData.slice(0, 5).forEach(repo => {
+            setOutput(prev => [
+              ...prev,
+              { type: 'output', text: `• ${repo.name} (${repo.language || 'N/A'})` },
+              { type: 'output', text: `  ${repo.description || 'No description'}` },
+              { type: 'output', text: `  ⭐ ${repo.stargazers_count} | 🍴 ${repo.forks_count} | 📅 ${formatDate(repo.updated_at)}` }
+            ]);
+          });
+        } else {
+          setOutput(prev => [...prev, { type: 'output', text: 'Fetching repositories...' }]);
+          const data = await fetchGitHubRepos();
+          if (data.length > 0) {
+            setOutput(prev => [
+              ...prev,
+              { type: 'output', text: '📚 Recent Repositories:' }
+            ]);
+            
+            data.slice(0, 5).forEach(repo => {
+              setOutput(prev => [
+                ...prev,
+                { type: 'output', text: `• ${repo.name} (${repo.language || 'N/A'})` },
+                { type: 'output', text: `  ${repo.description || 'No description'}` },
+                { type: 'output', text: `  ⭐ ${repo.stargazers_count} | 🍴 ${repo.forks_count} | 📅 ${formatDate(repo.updated_at)}` }
+              ]);
+            });
+          }
+        }
+        break;
+      case 'refresh':
+        setOutput(prev => [...prev, { type: 'output', text: '🔄 Refreshing all GitHub data...' }]);
+        await fetchAllGitHubData();
+        setLastRefresh(new Date());
+        setOutput(prev => [...prev, { type: 'output', text: '✅ Data refreshed successfully!' }]);
+        break;
+      case 'auto':
+        setAutoRefresh(!autoRefresh);
+        setOutput(prev => [
+          ...prev, 
+          { type: 'output', text: `Auto-refresh ${!autoRefresh ? 'enabled' : 'disabled'}. ${!autoRefresh ? 'Data will refresh every 5 minutes.' : ''}` }
+        ]);
+        break;
       case 'ask':
         const question = args.join(' ').trim();
         if (question) {
@@ -386,9 +586,19 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
             { type: 'output', text: `Years Active: ${Object.keys(contributionData.total).length}` }
           ]);
         } else {
-          await handleCommand('github'); // Fetch data first
-          if (contributionData) {
-            await handleCommand('stats'); // Retry stats command
+          setOutput(prev => [...prev, { type: 'output', text: 'Fetching contribution data first...' }]);
+          const data = await fetchContributions();
+          if (data) {
+            const streaks = calculateStreaks(data.contributions);
+            const totalContributions = Object.values(data.total).reduce((a, b) => a + b, 0);
+            setOutput(prev => [
+              ...prev,
+              { type: 'output', text: '📊 GitHub Statistics:' },
+              { type: 'output', text: `Total Contributions: ${totalContributions}` },
+              { type: 'output', text: `Current Streak: ${streaks.current} days` },
+              { type: 'output', text: `Longest Streak: ${streaks.longest} days (${streaks.longestStart} to ${streaks.longestEnd})` },
+              { type: 'output', text: `Years Active: ${Object.keys(data.total).length}` }
+            ]);
           }
         }
         break;
@@ -465,9 +675,16 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
             { type: 'output', text: `This year: ${thisYear} contributions` },
           ]);
         } else {
-          await handleCommand('github');
-          if (contributionData) {
-            await handleCommand('summary');
+          setOutput(prev => [...prev, { type: 'output', text: 'Fetching contribution data first...' }]);
+          const data = await fetchContributions();
+          if (data) {
+            const { last30Days, thisYear } = getContributionSummary(data.contributions);
+            setOutput(prev => [
+              ...prev,
+              { type: 'output', text: '📈 Contribution Summary:' },
+              { type: 'output', text: `Last 30 days: ${last30Days} contributions` },
+              { type: 'output', text: `This year: ${thisYear} contributions` },
+            ]);
           }
         }
         break;
@@ -649,6 +866,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
         </div>
       </div>
       {loading && <div className="text-gray-400 mt-2">Loading...</div>}
+      {autoRefresh && lastRefresh && (
+        <div className="text-gray-500 text-xs mt-2">
+          Auto-refresh enabled • Last updated: {lastRefresh.toLocaleTimeString()}
+        </div>
+      )}
     </div>
   );
 };
