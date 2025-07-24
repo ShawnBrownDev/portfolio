@@ -1,64 +1,34 @@
 export interface Command {
   name: string;
   description: string;
-  category: 'core' | 'customization' | 'utility';
+  category: 'core' | 'customization' | 'utility' | 'realtime';
   usage?: string;
   examples?: string[];
 }
 
 export const INSTALL_STEPS = [
   { 
-    name: 'Checking system compatibility', 
-    duration: 800,
-    details: [
-      'Verifying Node.js version',
-      'Checking package dependencies',
-      'Validating system requirements'
-    ]
-  },
-  { 
-    name: 'Installing core dependencies', 
-    duration: 1200,
-    details: [
-      'Setting up terminal engine',
-      'Installing GitHub API client',
-      'Configuring data handlers'
-    ]
-  },
-  { 
-    name: 'Configuring environment', 
-    duration: 1000,
-    details: [
-      'Loading environment variables',
-      'Setting up cache storage',
-      'Initializing state manager'
-    ]
-  },
-  { 
-    name: 'Setting up GitHub integration', 
-    duration: 1500,
-    details: [
-      'Establishing API connection',
-      'Fetching user profile',
-      'Setting up webhooks'
-    ]
-  },
-  { 
-    name: 'Initializing terminal features', 
-    duration: 900,
-    details: [
-      'Loading command handlers',
-      'Setting up auto-completion',
-      'Configuring history manager'
-    ]
-  },
-  { 
-    name: 'Running final checks', 
+    name: 'Setting up terminal', 
     duration: 600,
     details: [
-      'Verifying installations',
-      'Testing connections',
-      'Optimizing performance'
+      'Initializing components',
+      'Loading command system'
+    ]
+  },
+  { 
+    name: 'Connecting to GitHub', 
+    duration: 800,
+    details: [
+      'Establishing API connection',
+      'Testing data access'
+    ]
+  },
+  { 
+    name: 'Finalizing setup', 
+    duration: 400,
+    details: [
+      'Enabling commands',
+      'Ready to use'
     ]
   }
 ];
@@ -70,6 +40,20 @@ export const COMMANDS: Command[] = [
     category: 'core',
     usage: 'github',
     examples: ['github']
+  },
+  {
+    name: 'profile',
+    description: 'Show GitHub profile information',
+    category: 'core',
+    usage: 'profile',
+    examples: ['profile']
+  },
+  {
+    name: 'repos',
+    description: 'List recent repositories',
+    category: 'core',
+    usage: 'repos',
+    examples: ['repos']
   },
   {
     name: 'stats',
@@ -84,6 +68,20 @@ export const COMMANDS: Command[] = [
     category: 'core',
     usage: 'summary',
     examples: ['summary']
+  },
+  {
+    name: 'refresh',
+    description: 'Manually refresh all GitHub data',
+    category: 'realtime',
+    usage: 'refresh',
+    examples: ['refresh']
+  },
+  {
+    name: 'auto',
+    description: 'Toggle auto-refresh (every 5 minutes)',
+    category: 'realtime',
+    usage: 'auto',
+    examples: ['auto']
   },
   {
     name: 'theme',
