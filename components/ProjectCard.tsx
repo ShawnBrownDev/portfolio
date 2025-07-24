@@ -61,7 +61,7 @@ const ProjectCard = ({
         <p className="text-gray-400 mb-4 line-clamp-2">{project.description}</p>
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.categories.map((category) => (
+          {project.categories.map((category: Category) => (
             <Badge key={category.id} variant="secondary" className="bg-gray-700">
               {category.name}
             </Badge>
@@ -69,7 +69,7 @@ const ProjectCard = ({
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags?.map((tag, index) => (
+          {project.tags?.map((tag: string, index: number) => (
             <Badge key={index} variant="outline">
               {tag}
             </Badge>
