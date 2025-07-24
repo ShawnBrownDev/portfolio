@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { Database } from '@/types/supabase';
+import { Database } from '@/supabase/supa-schema';
 
 type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
   project_categories: Array<{

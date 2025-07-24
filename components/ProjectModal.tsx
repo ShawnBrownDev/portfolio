@@ -43,12 +43,14 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {/* Image Gallery */}
         <div className="mb-4 relative h-48 sm:h-64 w-full rounded-md overflow-hidden group">
-          <Image 
-            src={allImages[currentImageIndex]}
-            alt={`${project.title} image ${currentImageIndex + 1}`}
-            fill
-            className="object-cover"
-          />
+          {allImages[currentImageIndex] && (
+            <Image
+              src={allImages[currentImageIndex] as string}
+              alt={`${project.title} image ${currentImageIndex + 1}`}
+              fill
+              className="object-cover"
+            />
+          )}
           {/* Hoverable Lightbox Icon */}
           <button
             type="button"
@@ -85,14 +87,18 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl">
             <div className="relative max-h-[85vh] max-w-[90vw] rounded-lg overflow-hidden" style={{ background: 'black' }}>
-              <Image
-                src={allImages[currentImageIndex]}
-                alt="Full size preview"
-                width={800}
-                height={600}
-                className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+              {allImages[currentImageIndex] && (
+                <Image
+                  src={allImages[currentImageIndex] as string}
+                  alt="Full size preview"
+                  width={800}
+                  height={600}
+                  className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+                  priority
+                />
+              )}
                 priority
-              />
+              
             </div>
           </DialogContent>
         </Dialog>
@@ -100,7 +106,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         <p className="text-sm sm:text-base text-gray-300 mb-4">{project.description}</p>
 
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
-          {project.tags?.map((tag, index) => (
+          {project.tags?.map((tag: string, index: number) => (
             <span
               key={index}
               className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white"
@@ -114,7 +120,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           <div className="mb-4">
             <h4 className="text-base sm:text-lg font-semibold mb-2 text-white">Challenges:</h4>
             <ul className="list-disc list-inside text-sm sm:text-base text-gray-400 space-y-1">
-              {project.challenges.map((challenge, index) => (
+              {project.challenges.map((challenge: string, index: number) => (
                 <li key={index}>{challenge}</li>
               ))}
             </ul>
@@ -125,7 +131,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           <div className="mb-4">
             <h4 className="text-base sm:text-lg font-semibold mb-2 text-white">Solutions:</h4>
             <ul className="list-disc list-inside text-sm sm:text-base text-gray-400 space-y-1">
-              {project.solutions.map((solution, index) => (
+              {project.solutions.map((solution: string, index: number) => (
                 <li key={index}>{solution}</li>
               ))}
             </ul>

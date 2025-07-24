@@ -42,8 +42,8 @@ const Projects = () => {
 
   const filteredProjects = selectedCategory === 'all'
     ? projects
-    : projects.filter(project => 
-        project.categories.some(category => category.id === selectedCategory)
+        : projects.filter((project: Project & { categories: Category[] }) => 
+            project.categories.some((category: Category) => category.id === selectedCategory)
       );
 
   // Get unique categories from published projects
@@ -91,7 +91,7 @@ const Projects = () => {
           >
             All
           </motion.button>
-          {projectCategories.map((category) => (
+          {projectCategories.map((category: Category) => (
             <motion.button
               key={category.id}
               whileHover={{ scale: 1.05 }}

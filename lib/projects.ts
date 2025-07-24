@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Database } from '@/types/supabase';
+import type { Database } from '../supabase/supa-schema';
 
 export type Project = Database['public']['Tables']['projects']['Row'];
 export type ProjectInsert = Omit<Project, 'id' | 'created_at'>;

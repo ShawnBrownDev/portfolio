@@ -1,52 +1,80 @@
+import { supabase } from './supabase';
+
 export interface ExperienceItem {
   id: string;
+  user_id: string;
   title: string;
   company: string;
   period: string;
   description?: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export const experiences: ExperienceItem[] = [
-  {
-    id: 'exp-1',
-    title: 'Started Self Learning',
-    company: 'Started to learn programming',
-    period: '2019',
-  },
-   {
-    id: 'exp-2',
-    title: 'Started to Learn Lua for Fivem (GTA V Mod)',
-    company: 'Started to learn Lua for Fivem',
-    period: '2019-2020',
-  },
-  {
-    id: 'exp-3',
-    title: 'Started My Journey in React.js  ',
-    company: 'Started to learn React.js',
-    period: '2020-2021',
-  }, 
-   {
-    id: 'exp-4',
-    title: 'Started Learning Tailwind CSS',
-    company: 'Started to learn Tailwind CSS',
-    period: '2021-ongoing',
-  }, 
-  {
-    id: 'exp-5',
-    title: 'Started Learning TypeScript',
-    company: 'Started to learn TypeScript',
-    period: '2021-ongoing',
-  },
-   {
-    id: 'exp-6',
-    title: 'Started Learning Next.js',
-    company: 'Started to learn Next.js',
-    period: '2020-ongoing',
-  },
-  {
-    id: 'exp-7',
-    title: 'Start my journey in Freelancing',
-    company: 'Freelancing',
-    period: '2025-ongoing',
-  },
-];
+export interface ExperienceItemInput {
+  title: string;
+  company: string;
+  period: string;
+  description?: string;
+  order_index?: number;
+}
+
+export const getExperiences = async (): Promise<ExperienceItem[]> => {
+  const { data, error } = await (supabase as any)
+    .from('experiences')
+    .select('*')
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching experiences:', error);
+    return [];
+  }
+
+  return (data as ExperienceItem[]) || [];
+};
+
+export const addExperience = async (experience: ExperienceItemInput): Promise<ExperienceItem | null> => {
+  const { data, error } = await (supabase as any)
+    .from('experiences')
+    .insert([experience])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding experience:', error);
+    return null;
+  }
+
+  return data as ExperienceItem;
+};
+
+export const updateExperience = async (id: string, experience: Partial<ExperienceItemInput>): Promise<ExperienceItem | null> => {
+  const { data, error } = await (supabase as any)
+    .from('experiences')
+    .update(experience)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating experience:', error);
+    return null;
+  }
+
+  return data as ExperienceItem;
+};
+
+export const deleteExperience = async (id: string): Promise<boolean> => {
+  const { error } = await (supabase as any)
+    .from('experiences')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting experience:', error);
+    return false;
+  }
+
+  return true;
+};

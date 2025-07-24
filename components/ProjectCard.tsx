@@ -28,13 +28,15 @@ const ProjectCard = ({
   return (
     <div className="group relative bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
-        <Image
-          src={project.image}
-          alt={project.title}
-          fill
-          priority={isFirst}
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {project.image && (
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            priority={isFirst}
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        )}
         {/* Draft badge and publish icon */}
         {!project.is_published && (
           <div className="absolute top-2 left-2 flex items-center gap-2 z-10">
@@ -61,7 +63,7 @@ const ProjectCard = ({
         <p className="text-gray-400 mb-4 line-clamp-2">{project.description}</p>
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.categories.map((category) => (
+          {project.categories.map((category: Category) => (
             <Badge key={category.id} variant="secondary" className="bg-gray-700">
               {category.name}
             </Badge>
@@ -69,7 +71,7 @@ const ProjectCard = ({
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags?.map((tag, index) => (
+          {project.tags?.map((tag: string, index: number) => (
             <Badge key={index} variant="outline">
               {tag}
             </Badge>
