@@ -1,7 +1,28 @@
-import { experiences } from '@/lib/experience';
+"use client";
+
+import { useEffect, useState } from 'react';
+import { getExperiences, ExperienceItem } from '@/lib/experience';
 import TimelineItem from './TimelineItem';
 
 const AboutMe = () => {
+  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        const data = await getExperiences();
+        setExperiences(data);
+      } catch (error) {
+        console.error('Error fetching experiences:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExperiences();
+  }, []);
+
   return (
     <section id="about" className="py-20">
       <div className="container mx-auto px-4 md:px-6">
@@ -51,14 +72,18 @@ const AboutMe = () => {
 
           {/* Timeline Section */}
           <div>
-              {experiences.map((experience, index) => (
+            {loading ? (
+              <div className="text-center py-8 text-slate-400">Loading experience timeline...</div>
+            ) : (
+              experiences.map((experience, index) => (
                 <TimelineItem 
                   key={experience.id}
                   item={experience}
                   isLast={index === experiences.length - 1}
                   index={index}
                 />
-              ))}
+              ))
+            )}
           </div>
         </div>
       </div>
