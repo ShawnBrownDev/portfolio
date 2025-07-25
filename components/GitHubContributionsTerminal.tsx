@@ -194,7 +194,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       // Process each installation step
       for (let i = 0; i < INSTALL_STEPS.length; i++) {
         const step = INSTALL_STEPS[i];
-        
+
         // Process sub-steps
         for (const detail of step.details) {
           await sleep(step.duration / step.details.length);

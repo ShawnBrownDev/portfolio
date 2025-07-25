@@ -28,7 +28,7 @@ export function UserInfoCard() {
         showNotification('error', 'Failed to fetch user data');
       } finally {
         setLoading(false);
-      }
+}
     }
 
     getUser();
@@ -61,7 +61,7 @@ export function UserInfoCard() {
   }
 
   if (!user) {
-    return (
+  return (
       <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
@@ -119,7 +119,7 @@ export function UserInfoCard() {
 
         <div className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
           <Shield className="w-4 h-4 text-purple-400" />
-          <div>
+      <div>
             <p className="text-white text-sm font-medium">
               {user.email_confirmed_at ? 'Verified' : 'Unverified'}
             </p>

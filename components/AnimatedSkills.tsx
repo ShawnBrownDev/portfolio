@@ -28,8 +28,8 @@ const AnimatedSkills = () => {
   };
 
   const itemVariants = {
-    hidden: {
-      y: 20,
+    hidden: { 
+      y: 20, 
       opacity: 0,
       scale: 0.95,
       transition: {
