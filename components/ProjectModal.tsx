@@ -15,6 +15,8 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
   const allImages = [project.image, ...(project.additionalimages || [])];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
 
   const handleNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
@@ -145,17 +147,53 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-end">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-end relative">
           {project.demourl && (
-            <a
-              href={project.demourl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90 w-full sm:w-auto"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Live Demo
-            </a>
+            <>
+              <a
+                href={project.demourl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors bg-primary text-primary-foreground rounded-md hover:bg-primary/90 w-full sm:w-auto"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Live Demo
+              </a>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setDemoOpen(true); setIframeError(false); }}
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-300 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md hover:from-purple-700 hover:to-blue-700 hover:scale-105 hover:shadow-lg w-full sm:w-auto border border-purple-500/30 shadow-[0_0_20px_rgba(147,51,234,0.3)]"
+                >
+                  🚀 Interactive Demo
+                </button>
+              </div>
+              <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+                <DialogContent className="flex flex-col items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl min-h-[60vh]">
+                  {!iframeError ? (
+                    <iframe
+                      src={project.demourl}
+                      title="Project Demo"
+                      className="w-[90vw] h-[60vh] sm:w-[60vw] sm:h-[70vh] rounded-lg border border-gray-700 bg-white"
+                      allow="clipboard-write; fullscreen"
+                      onError={() => setIframeError(true)}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full p-8">
+                      <span className="text-red-500 text-lg font-semibold mb-2">Unable to display the demo here.</span>
+                      <a
+                        href={project.demourl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 underline text-base"
+                      >
+                        Open Live Demo in New Tab
+                      </a>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </>
           )}
 
           {project.githuburl && (

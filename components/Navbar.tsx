@@ -58,10 +58,10 @@ const Navbar = () => {
     
     // Wait a bit for the menu to close, then scroll
     setTimeout(() => {
-      const element = document.querySelector(href);
+    const element = document.querySelector(href);
       console.log('Found element:', element);
       
-      if (element) {
+    if (element) {
         // Re-enable body scroll for smooth scrolling
         document.body.style.overflow = 'unset';
         document.body.classList.remove('menu-open');
@@ -72,7 +72,7 @@ const Navbar = () => {
         });
       } else {
         console.error('Element not found:', href);
-      }
+    }
     }, 300); // Wait for menu close animation
   };
 
@@ -228,11 +228,11 @@ const Navbar = () => {
               <div className="px-6 pb-8">
                 <div className="space-y-2">
                   {navLinks.map((link, index) => (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href)}
-                      className={cn(
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className={cn(
                         "block px-4 py-4 rounded-2xl text-lg font-semibold transition-all duration-200 cursor-pointer",
                         "text-white hover:text-white",
                         "bg-gray-800 hover:bg-gray-700 active:scale-98",
@@ -242,10 +242,10 @@ const Navbar = () => {
                       style={{
                         animationDelay: `${index * 50}ms`
                       }}
-                    >
-                      {link.label}
-                    </a>
-                  ))}
+              >
+                {link.label}
+              </a>
+            ))}
                 </div>
                 
                 {/* Theme Section */}
@@ -276,8 +276,8 @@ const Navbar = () => {
                   </div>
                 </div>
               </div>
-            </div>
           </div>
+        </div>
         </>
       )}
     </header>

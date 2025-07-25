@@ -517,13 +517,13 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             </div>
 
             {additionalImagesInputMode === 'url' ? (
-              <input
-                name="additionalimages"
-                placeholder="Additional image URLs (comma-separated)"
-                value={form.additionalimages?.join(', ') || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-              />
+        <input
+          name="additionalimages"
+              placeholder="Additional image URLs (comma-separated)"
+          value={form.additionalimages?.join(', ') || ''}
+          onChange={handleChange}
+              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+            />
             ) : (
               <div className="space-y-3">
                 <input
