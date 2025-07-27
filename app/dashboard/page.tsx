@@ -10,6 +10,7 @@ import { Navbar } from '@/components/admin/Navbar';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+
 export default function DashboardPage() {
   const supabase = createClientComponentClient();
 
