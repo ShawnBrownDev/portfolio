@@ -120,7 +120,6 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setProfileData(data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch GitHub profile:', error);
       return null;
     }
   };
@@ -133,7 +132,6 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setReposData(data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch GitHub repos:', error);
       return [];
     }
   };
@@ -148,7 +146,6 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       }]);
       return [];
     } catch (error) {
-      console.error('Failed to fetch recent commits:', error);
       return [];
     }
   };
@@ -163,7 +160,6 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
         fetchRecentCommits()
       ]);
     } catch (error) {
-      console.error('Failed to fetch GitHub data:', error);
     } finally {
       setLoading(false);
     }
@@ -268,7 +264,6 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setContributionData(data);
       return data;
     } catch (e: any) {
-      console.error("Failed to fetch contributions:", e);
       setError(e.message || 'Failed to fetch contributions.');
       setOutput(prev => [...prev, { type: 'error', text: `Error fetching contributions: ${e.message || 'Unknown error'}` }]);
       return null;
@@ -540,22 +535,17 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           };
 
           const userKeywords = extractKeywords(question); // Extract keywords once
-          // console.log('User keywords:', userKeywords); // Log user keywords
           let bestMatch: QnaItem | null = null;
           let maxMatches = 0;
 
           qna.forEach(item => {
             const qnaKeywords = extractKeywords(item.question);
-            // console.log(`QNA item: ${item.question}`, 'Keywords:', qnaKeywords); // Log QNA keywords
             const commonKeywords = userKeywords.filter(keyword => qnaKeywords.includes(keyword));
-            // console.log('Common keywords:', commonKeywords, 'Matches:', commonKeywords.length); // Log common keywords and count
             if (commonKeywords.length > maxMatches) {
               maxMatches = commonKeywords.length;
               bestMatch = item;
             }
           });
-
-          // console.log('Best match:', bestMatch ? bestMatch!.question : 'None', 'Max matches:', maxMatches); // Log best match and count with non-null assertion
 
           // Check if a best match was found and has more than 4 common keywords
           if (bestMatch && maxMatches >= 4) {

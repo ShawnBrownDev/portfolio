@@ -51,15 +51,12 @@ const Navbar = () => {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     
-    console.log('Navigating to:', href);
-    
     // Close mobile menu first
     setIsOpen(false);
     
     // Wait a bit for the menu to close, then scroll
     setTimeout(() => {
     const element = document.querySelector(href);
-      console.log('Found element:', element);
       
     if (element) {
         // Re-enable body scroll for smooth scrolling
@@ -70,9 +67,7 @@ const Navbar = () => {
           behavior: 'smooth',
           block: 'start'
         });
-      } else {
-        console.error('Element not found:', href);
-    }
+      }
     }, 300); // Wait for menu close animation
   };
 

@@ -27,7 +27,6 @@ export const getExperiences = async (): Promise<ExperienceItem[]> => {
     .order('order_index', { ascending: true });
 
   if (error) {
-    console.error('Error fetching experiences:', error);
     return [];
   }
 
@@ -42,7 +41,6 @@ export const addExperience = async (experience: ExperienceItemInput): Promise<Ex
     .single();
 
   if (error) {
-    console.error('Error adding experience:', error);
     return null;
   }
 
@@ -58,7 +56,6 @@ export const updateExperience = async (id: string, experience: Partial<Experienc
     .single();
 
   if (error) {
-    console.error('Error updating experience:', error);
     return null;
   }
 
@@ -72,7 +69,6 @@ export const deleteExperience = async (id: string): Promise<boolean> => {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting experience:', error);
     return false;
   }
 

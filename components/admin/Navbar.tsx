@@ -16,7 +16,6 @@ export function Navbar({ supabase }: NavbarProps) {
       await supabase.auth.signOut();
       router.replace('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 

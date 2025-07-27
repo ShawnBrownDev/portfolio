@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Project } from '../lib/projects';
 import { X, ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image'; // Replaced with regular img tags
 import { Dialog, DialogContent } from './ui/dialog';
 
 interface ProjectModalProps {
@@ -46,11 +46,10 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         {/* Image Gallery */}
         <div className="mb-4 relative h-48 sm:h-64 w-full rounded-md overflow-hidden group">
           {allImages[currentImageIndex] && (
-            <Image
+            <img
               src={allImages[currentImageIndex] as string}
               alt={`${project.title} image ${currentImageIndex + 1}`}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           )}
           {/* Hoverable Lightbox Icon */}
@@ -90,13 +89,10 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl">
             <div className="relative max-h-[85vh] max-w-[90vw] rounded-lg overflow-hidden" style={{ background: 'black' }}>
               {allImages[currentImageIndex] && (
-                <Image
+                <img
                   src={allImages[currentImageIndex] as string}
                   alt="Full size preview"
-                  width={800}
-                  height={600}
                   className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
-                  priority
                 />
               )}
                 priority

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Edit2, Trash2, Globe, Github, Eye, EyeOff } from 'lucide-react';
 import { Project } from '@/types/project';
 import { Card } from '@/components/ui/card';
@@ -38,12 +37,10 @@ export function ProjectCard({ project, handleTogglePublished, isToggling, onDele
     <>
       <Card className="bg-[#1a1a1a] border border-[#333] overflow-hidden">
         <div className="relative aspect-video overflow-hidden">
-          <Image
+          <img
             src={project.image}
             alt={project.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="w-full h-full object-cover"
           />
           {!project.is_published && (
             <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">

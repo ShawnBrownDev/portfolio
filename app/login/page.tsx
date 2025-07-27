@@ -25,7 +25,6 @@ function LoginPage() {
     }
 
     try {
-      console.log('Attempting to sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -40,11 +39,30 @@ function LoginPage() {
         throw new Error('No session created after login');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       setError(error.message);
       showNotification('error', error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Example MFA handling (you can add this to your login page if needed)
+  const handleMFAChallenge = async (factorId: string, code: string) => {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        factorId,
+        code,
+      });
+      
+      if (error) throw error;
+      
+      if (data.session) {
+        showNotification('success', 'Successfully logged in!');
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      setError(error.message);
+      showNotification('error', error.message);
     }
   };
 

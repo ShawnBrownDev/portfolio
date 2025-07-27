@@ -7,7 +7,6 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useNotification } from '@/contexts/NotificationContext';
 import { Loader2, X, Upload, Image as ImageIcon, Link } from 'lucide-react';
-import Image from 'next/image';
 import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -167,7 +166,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       setForm(prev => ({ ...prev, image: data.url }));
       showNotification('success', 'Image uploaded successfully!');
     } catch (error: any) {
-      console.error('Upload error:', error);
       showNotification('error', error.message || 'Failed to upload image');
     } finally {
       setUploadingImage(false);
@@ -223,7 +221,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       }));
       showNotification('success', `${files.length} image(s) uploaded successfully!`);
     } catch (error: any) {
-      console.error('Upload error:', error);
       showNotification('error', error.message || 'Failed to upload images');
     } finally {
       setUploadingAdditionalImages(false);
@@ -568,12 +565,10 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   {form.additionalimages.map((imageUrl: string, index: number) => (
                     <div key={index} className="relative group">
                       <div className="relative w-full h-20 sm:h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                        <Image
+                        <img
                           src={imageUrl}
                           alt={`Additional image ${index + 1}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 50vw, 25vw"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <button
@@ -601,12 +596,10 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <div className="mt-4">
               <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
               <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                <Image
+                <img
                   src={previewImage}
                   alt="Preview"
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="w-full h-full object-contain"
         />
               </div>
             </div>

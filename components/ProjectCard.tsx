@@ -1,10 +1,10 @@
 "use client";
 
 import { Project, Category } from '@/lib/projects';
-import Image from 'next/image';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import SimpleImage from './SimpleImage';
 
 interface ProjectCardProps {
   project: Project & { categories: Category[] };
@@ -29,12 +29,11 @@ const ProjectCard = ({
     <div className="group relative bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
         {project.image && (
-          <Image
+          <SimpleImage
             src={project.image}
             alt={project.title}
             fill
-            priority={isFirst}
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="transition-transform duration-300 group-hover:scale-105"
           />
         )}
         {/* Draft badge and publish icon */}

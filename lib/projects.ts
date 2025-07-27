@@ -27,7 +27,6 @@ export async function getProjects(): Promise<(Project & { categories: Category[]
       .eq('is_published', true);
 
     if (projectsError) {
-      console.error('Error fetching projects:', projectsError);
       return [];
     }
 
@@ -47,7 +46,6 @@ export async function getProjects(): Promise<(Project & { categories: Category[]
 
     return transformedProjects;
   } catch (error) {
-    console.error('Error fetching projects:', error);
     return [];
   }
 }
@@ -64,13 +62,11 @@ export async function getCategories(): Promise<Category[]> {
       .order('name');
 
     if (error) {
-      console.error('Error fetching categories:', error);
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error fetching categories:', error);
     return [];
   }
 }
@@ -94,7 +90,6 @@ export async function addProjectCategories(projectId: string, categoryIds: strin
       throw error;
     }
   } catch (error) {
-    console.error('Error adding project categories:', error);
     throw error;
   }
 }
@@ -166,7 +161,6 @@ export async function updateProject(
       .eq('id', id);
 
     if (projectError) {
-      console.error('Error updating project:', projectError);
       throw projectError;
     }
 
@@ -177,7 +171,6 @@ export async function updateProject(
       .eq('project_id', id);
 
     if (deleteError) {
-      console.error('Error deleting existing categories:', deleteError);
       throw deleteError;
     }
 
@@ -193,14 +186,12 @@ export async function updateProject(
         );
 
       if (insertError) {
-        console.error('Error inserting new categories:', insertError);
         throw insertError;
       }
     }
 
     return { error: null };
   } catch (error) {
-    console.error('Error in updateProject:', error);
     return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
   }
 } 
@@ -226,7 +217,6 @@ export async function getAllProjects(): Promise<(Project & { categories: Categor
       `);
 
     if (projectsError) {
-      console.error('Error fetching all projects:', projectsError);
       return [];
     }
 
@@ -246,7 +236,6 @@ export async function getAllProjects(): Promise<(Project & { categories: Categor
 
     return transformedProjects;
   } catch (error) {
-    console.error('Error fetching all projects:', error);
     return [];
   }
 } 
@@ -266,13 +255,11 @@ export async function toggleProjectPublishedStatus(
       .eq('id', projectId);
 
     if (error) {
-      console.error('Error updating project published status:', error);
       return { error: new Error(error.message) };
     }
 
     return { error: null };
   } catch (error) {
-    console.error('Error in toggleProjectPublishedStatus:', error);
     return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
   }
 } 
@@ -289,13 +276,11 @@ export async function publishAllProjects(): Promise<{ error: Error | null }> {
       .is('is_published', null);
 
     if (error) {
-      console.error('Error publishing all projects:', error);
       return { error: new Error(error.message) };
     }
 
     return { error: null };
   } catch (error) {
-    console.error('Error in publishAllProjects:', error);
     return { error: error instanceof Error ? error : new Error('Unknown error occurred') };
   }
 } 

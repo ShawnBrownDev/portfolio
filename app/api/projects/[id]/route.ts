@@ -36,7 +36,6 @@ export async function PUT(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error updating project:', error);
     return NextResponse.json(
       { error: 'Failed to update project' },
       { status: 500 }
@@ -67,7 +66,6 @@ export async function DELETE(
       .eq('project_id', id);
 
     if (categoriesError) {
-      console.error('Error deleting project categories:', categoriesError);
       return NextResponse.json(
         { error: categoriesError.message },
         { status: 500 }
@@ -81,7 +79,6 @@ export async function DELETE(
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting project:', error);
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -90,7 +87,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting project:', error);
     return NextResponse.json(
       { error: 'Failed to delete project' },
       { status: 500 }
@@ -129,7 +125,6 @@ export async function GET(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching project:', error);
     return NextResponse.json(
       { error: 'Failed to fetch project' },
       { status: 500 }

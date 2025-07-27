@@ -14,7 +14,6 @@ const AboutMe = () => {
         const data = await getExperiences();
         setExperiences(data);
       } catch (error) {
-        console.error('Error fetching experiences:', error);
       } finally {
         setLoading(false);
       }
