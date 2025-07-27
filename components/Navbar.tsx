@@ -195,20 +195,22 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation Menu - Bottom Sheet */}
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-60 z-[60] md:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Bottom Sheet */}
-          <div className={cn(
-            "mobile-menu-container fixed bottom-0 left-0 right-0 z-[70] md:hidden transform transition-transform duration-300 ease-out",
-            "w-screen h-auto",
-            isOpen ? "translate-y-0" : "translate-y-full"
-          )}>
+      <>
+        {/* Backdrop */}
+        <div 
+          className={cn(
+            "fixed inset-0 bg-black bg-opacity-60 z-[60] md:hidden transition-opacity duration-300",
+            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          )}
+          onClick={() => setIsOpen(false)}
+        />
+        
+        {/* Bottom Sheet */}
+        <div className={cn(
+          "mobile-menu-container fixed bottom-0 left-0 right-0 z-[70] md:hidden transform transition-transform duration-300 ease-out",
+          "w-screen h-auto",
+          isOpen ? "translate-y-0" : "translate-y-full"
+        )}>
             <div className={cn(
               "rounded-t-3xl shadow-2xl border-t",
               "bg-gray-900 border-gray-700",
@@ -271,10 +273,9 @@ const Navbar = () => {
                   </div>
                 </div>
               </div>
+            </div>
           </div>
-        </div>
         </>
-      )}
     </header>
   );
 };

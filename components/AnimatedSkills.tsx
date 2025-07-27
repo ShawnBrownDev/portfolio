@@ -108,39 +108,44 @@ const AnimatedSkills = () => {
           initial="hidden"
           animate={controls}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          style={{ 
+            minHeight: '600px',
+            contain: 'layout style paint'
+          }}
         >
-          <AnimatePresence>
-            {filteredSkills.map((skill: Skill) => (
-              <motion.div
-                key={skill.name}
-                variants={itemVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                whileHover={{ scale: 1.02 }}
-                className="bg-gray-800 rounded-lg p-6 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-4">
-                    <skill.icon className="w-8 h-8 text-primary" />
-                    <h3 className="text-xl font-semibold">{skill.name}</h3>
-                  </div>
-                  <p className="text-gray-400">{skill.description}</p>
-                  <div className="mt-4 flex items-center gap-2">
-                    {skill.category.map((cat, index) => (
-                       <span
-                         key={index}
-                         className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white-300"
-                       >
-                         {cat}
-                       </span>
-                    ))}
-                  </div>
+          {filteredSkills.map((skill: Skill) => (
+            <motion.div
+              key={skill.name}
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              whileHover={{ scale: 1.02 }}
+              className="bg-gray-800 rounded-lg p-6 relative overflow-hidden group"
+              style={{ 
+                minHeight: '200px',
+                contain: 'layout style paint'
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <skill.icon className="w-8 h-8 text-primary" />
+                  <h3 className="text-xl font-semibold">{skill.name}</h3>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                <p className="text-gray-400">{skill.description}</p>
+                <div className="mt-4 flex items-center gap-2">
+                  {skill.category.map((cat, index) => (
+                     <span
+                       key={index}
+                       className="text-xs px-2 py-1 rounded-full bg-gray-700 text-white-300"
+                     >
+                       {cat}
+                     </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </section>
