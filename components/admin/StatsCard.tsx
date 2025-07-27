@@ -45,7 +45,6 @@ export function StatsCard() {
 
         setStats(stats);
       } catch (err) {
-        console.error('Error fetching stats:', err);
         showNotification('error', 'Failed to fetch project statistics');
       } finally {
         setLoading(false);

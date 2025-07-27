@@ -16,14 +16,26 @@ const Projects = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectsData, categoriesData] = await Promise.all([
-          getProjects(),
-          getCategories()
+        const [projectsResponse, categoriesResponse] = await Promise.all([
+          fetch('/api/projects'),
+          fetch('/api/categories')
         ]);
+
+        if (!projectsResponse.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        if (!categoriesResponse.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+
+        const [projectsData, categoriesData] = await Promise.all([
+          projectsResponse.json(),
+          categoriesResponse.json()
+        ]);
+
         setProjects(projectsData);
         setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }

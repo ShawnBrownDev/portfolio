@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { addProject, getCategories, updateProject } from '@/lib/projects';
 import type { Project, Category } from '@/lib/projects';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useNotification } from '@/contexts/NotificationContext';
 import { Loader2, X, Upload, Image as ImageIcon, Link } from 'lucide-react';
-import Image from 'next/image';
 import { TagInput } from './ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -167,7 +167,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       setForm(prev => ({ ...prev, image: data.url }));
       showNotification('success', 'Image uploaded successfully!');
     } catch (error: any) {
-      console.error('Upload error:', error);
       showNotification('error', error.message || 'Failed to upload image');
     } finally {
       setUploadingImage(false);
@@ -223,7 +222,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
       }));
       showNotification('success', `${files.length} image(s) uploaded successfully!`);
     } catch (error: any) {
-      console.error('Upload error:', error);
       showNotification('error', error.message || 'Failed to upload images');
     } finally {
       setUploadingAdditionalImages(false);
@@ -573,7 +571,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                           alt={`Additional image ${index + 1}`}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 768px) 50vw, 25vw"
                         />
                       </div>
                       <button
@@ -606,7 +603,6 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   alt="Preview"
                   fill
                   className="object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
               </div>
             </div>

@@ -25,7 +25,6 @@ function LoginPage() {
     }
 
     try {
-      console.log('Attempting to sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -40,13 +39,14 @@ function LoginPage() {
         throw new Error('No session created after login');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       setError(error.message);
       showNotification('error', error.message);
     } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">

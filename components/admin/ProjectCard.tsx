@@ -43,7 +43,6 @@ export function ProjectCard({ project, handleTogglePublished, isToggling, onDele
             alt={project.title}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           {!project.is_published && (
             <div className="absolute top-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-medium">

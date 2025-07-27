@@ -24,7 +24,6 @@ export function UserInfoCard() {
         if (error) throw error;
         setUser(user);
       } catch (err) {
-        console.error('Error fetching user:', err);
         showNotification('error', 'Failed to fetch user data');
       } finally {
         setLoading(false);

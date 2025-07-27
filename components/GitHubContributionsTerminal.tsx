@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, KeyboardEvent, ChangeEvent } from 'react';
+import React, { useEffect, useState, useRef, KeyboardEvent, ChangeEvent, useCallback } from 'react';
 import { qna, QnaItem } from '@/lib/answers';
 import { useTheme, Theme } from '@/contexts/ThemeContext';
 import { COMMANDS, INSTALL_STEPS, LOADING_FRAMES, createProgressBar } from '@/lib/terminal';
@@ -97,22 +97,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     }
   }, [isInstalled]);
 
-  // Auto-refresh GitHub data every 5 minutes if enabled
-  useEffect(() => {
-    if (!autoRefresh || !isInstalled) return;
-
-    const interval = setInterval(async () => {
-      setOutput(prev => [...prev, { type: 'output', text: '🔄 Auto-refreshing GitHub data...' }]);
-      await fetchAllGitHubData();
-      setLastRefresh(new Date());
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [autoRefresh, isInstalled]);
-
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const fetchGitHubProfile = async (): Promise<GitHubProfile | null> => {
+
+
+  const fetchGitHubProfile = useCallback(async (): Promise<GitHubProfile | null> => {
     try {
       const response = await fetch(`https://api.github.com/users/${username}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,12 +109,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setProfileData(data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch GitHub profile:', error);
       return null;
     }
-  };
+  }, [username]);
 
-  const fetchGitHubRepos = async (): Promise<GitHubRepo[]> => {
+  const fetchGitHubRepos = useCallback(async (): Promise<GitHubRepo[]> => {
     try {
       const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -133,12 +121,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setReposData(data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch GitHub repos:', error);
       return [];
     }
-  };
+  }, [username]);
 
-  const fetchRecentCommits = async (): Promise<GitHubCommit[]> => {
+  const fetchRecentCommits = useCallback(async (): Promise<GitHubCommit[]> => {
     try {
       // Note: This is a simplified approach. GitHub API requires authentication for user events
       // For now, we'll show a message about this limitation
@@ -148,26 +135,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       }]);
       return [];
     } catch (error) {
-      console.error('Failed to fetch recent commits:', error);
       return [];
     }
-  };
+  }, []);
 
-  const fetchAllGitHubData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        fetchContributions(),
-        fetchGitHubProfile(),
-        fetchGitHubRepos(),
-        fetchRecentCommits()
-      ]);
-    } catch (error) {
-      console.error('Failed to fetch GitHub data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const simulateInstall = async () => {
     setOutput(prev => [
@@ -254,7 +226,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     }
   }, [output]);
 
-  const fetchContributions = async () => {
+  const fetchContributions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`);
@@ -268,14 +240,41 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
       setContributionData(data);
       return data;
     } catch (e: any) {
-      console.error("Failed to fetch contributions:", e);
       setError(e.message || 'Failed to fetch contributions.');
       setOutput(prev => [...prev, { type: 'error', text: `Error fetching contributions: ${e.message || 'Unknown error'}` }]);
       return null;
     } finally {
       setLoading(false);
     }
-  };
+  }, [username]);
+
+  const fetchAllGitHubData = useCallback(async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchContributions(),
+        fetchGitHubProfile(),
+        fetchGitHubRepos(),
+        fetchRecentCommits()
+      ]);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchContributions, fetchGitHubProfile, fetchGitHubRepos, fetchRecentCommits]);
+
+  // Auto-refresh GitHub data every 5 minutes if enabled
+  useEffect(() => {
+    if (!autoRefresh || !isInstalled) return;
+
+    const interval = setInterval(async () => {
+      setOutput(prev => [...prev, { type: 'output', text: '🔄 Auto-refreshing GitHub data...' }]);
+      await fetchAllGitHubData();
+      setLastRefresh(new Date());
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, isInstalled, fetchAllGitHubData]);
 
   const renderContributionGrid = (contributions: ContributionDay[]) => {
     // Basic grid display (mimicking the calendar view)
@@ -540,22 +539,17 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
           };
 
           const userKeywords = extractKeywords(question); // Extract keywords once
-          // console.log('User keywords:', userKeywords); // Log user keywords
           let bestMatch: QnaItem | null = null;
           let maxMatches = 0;
 
           qna.forEach(item => {
             const qnaKeywords = extractKeywords(item.question);
-            // console.log(`QNA item: ${item.question}`, 'Keywords:', qnaKeywords); // Log QNA keywords
             const commonKeywords = userKeywords.filter(keyword => qnaKeywords.includes(keyword));
-            // console.log('Common keywords:', commonKeywords, 'Matches:', commonKeywords.length); // Log common keywords and count
             if (commonKeywords.length > maxMatches) {
               maxMatches = commonKeywords.length;
               bestMatch = item;
             }
           });
-
-          // console.log('Best match:', bestMatch ? bestMatch!.question : 'None', 'Max matches:', maxMatches); // Log best match and count with non-null assertion
 
           // Check if a best match was found and has more than 4 common keywords
           if (bestMatch && maxMatches >= 4) {

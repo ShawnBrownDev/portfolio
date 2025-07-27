@@ -27,7 +27,7 @@ export function ProjectsTab() {
   const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/projects');
+      const response = await fetch('/api/projects?includeUnpublished=true');
       const data = await response.json();
 
       if (!response.ok) {
@@ -36,7 +36,6 @@ export function ProjectsTab() {
 
       setProjects(data);
     } catch (error: any) {
-      console.error('Error fetching projects:', error);
       showNotification('error', error.message || 'Failed to fetch projects');
     } finally {
       setLoading(false);
@@ -61,7 +60,6 @@ export function ProjectsTab() {
       showNotification('success', 'Project deleted successfully');
       fetchProjects();
     } catch (error: any) {
-      console.error('Error deleting project:', error);
       showNotification('error', error.message || 'Failed to delete project');
     }
   };

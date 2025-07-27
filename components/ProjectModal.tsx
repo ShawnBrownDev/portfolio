@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Project } from '../lib/projects';
 import { X, ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
 import { Dialog, DialogContent } from './ui/dialog';
 
 interface ProjectModalProps {
@@ -96,11 +96,8 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
                   width={800}
                   height={600}
                   className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
-                  priority
                 />
               )}
-                priority
-              
             </div>
           </DialogContent>
         </Dialog>

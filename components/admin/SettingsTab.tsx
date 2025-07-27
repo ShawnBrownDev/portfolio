@@ -60,7 +60,6 @@ export function SettingsTab() {
       showNotification('success', 'Project deleted successfully');
       fetchProjects();
     } catch (error: any) {
-      console.error('Error deleting project:', error);
       showNotification('error', error.message || 'Failed to delete project');
     }
   };

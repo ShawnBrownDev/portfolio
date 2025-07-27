@@ -3,23 +3,22 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Database } from '@/supabase/supa-schema';
 
-type ProjectWithCategories = Database['public']['Tables']['projects']['Row'] & {
-  project_categories: Array<{
-    category_id: string;
-    categories: {
-      id: string;
-      name: string;
-    };
-  }>;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    console.log('Fetching all projects from Supabase...');
+    const url = new URL(request.url);
+    const includeUnpublished = url.searchParams.get('includeUnpublished') === 'true';
+    
+
     const supabase = createRouteHandlerClient<Database>({ cookies });
     
-    // Get all projects (including unpublished) with their categories
-    const { data: projects, error: projectsError } = await supabase
+    // Build the query
+    let query = supabase
       .from('projects')
       .select(`
         *,
@@ -32,11 +31,17 @@ export async function GET() {
         )
       `);
 
+    // If not including unpublished, filter for published only
+    if (!includeUnpublished) {
+      query = query.eq('is_published', true);
+    }
+
+    const { data: projects, error: projectsError } = await query;
+
     if (projectsError) {
-      console.error('Error fetching all projects:', projectsError);
       return NextResponse.json(
         { error: 'Failed to fetch projects' },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -54,13 +59,11 @@ export async function GET() {
       };
     });
 
-    console.log('Successfully fetched projects:', transformedProjects?.length);
-    return NextResponse.json(transformedProjects || []);
+    return NextResponse.json(transformedProjects || [], { headers: corsHeaders });
   } catch (error) {
-    console.error('Error in GET /api/projects:', error);
     return NextResponse.json(
       { error: 'Failed to fetch projects' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -86,7 +89,6 @@ export async function POST(request: Request) {
       .returns<Database['public']['Tables']['projects']['Row']>();
 
     if (error) {
-      console.error('Error creating project:', error);
       return NextResponse.json(
         { error: error.message },
         { status: 500 }
@@ -95,7 +97,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error in POST /api/projects:', error);
     return NextResponse.json(
       { error: 'Failed to create project' },
       { status: 500 }
@@ -138,7 +139,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting project:', error);
     return NextResponse.json(
       { error: 'Failed to delete project' },
       { status: 500 }
