@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, KeyboardEvent, ChangeEvent } from 'react';
+import React, { useEffect, useState, useRef, KeyboardEvent, ChangeEvent, useCallback } from 'react';
 import { qna, QnaItem } from '@/lib/answers';
 import { useTheme, Theme } from '@/contexts/ThemeContext';
 import { COMMANDS, INSTALL_STEPS, LOADING_FRAMES, createProgressBar } from '@/lib/terminal';
@@ -97,22 +97,11 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     }
   }, [isInstalled]);
 
-  // Auto-refresh GitHub data every 5 minutes if enabled
-  useEffect(() => {
-    if (!autoRefresh || !isInstalled) return;
-
-    const interval = setInterval(async () => {
-      setOutput(prev => [...prev, { type: 'output', text: '🔄 Auto-refreshing GitHub data...' }]);
-      await fetchAllGitHubData();
-      setLastRefresh(new Date());
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [autoRefresh, isInstalled]);
-
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const fetchGitHubProfile = async (): Promise<GitHubProfile | null> => {
+
+
+  const fetchGitHubProfile = useCallback(async (): Promise<GitHubProfile | null> => {
     try {
       const response = await fetch(`https://api.github.com/users/${username}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -122,9 +111,9 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     } catch (error) {
       return null;
     }
-  };
+  }, [username]);
 
-  const fetchGitHubRepos = async (): Promise<GitHubRepo[]> => {
+  const fetchGitHubRepos = useCallback(async (): Promise<GitHubRepo[]> => {
     try {
       const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -134,9 +123,9 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     } catch (error) {
       return [];
     }
-  };
+  }, [username]);
 
-  const fetchRecentCommits = async (): Promise<GitHubCommit[]> => {
+  const fetchRecentCommits = useCallback(async (): Promise<GitHubCommit[]> => {
     try {
       // Note: This is a simplified approach. GitHub API requires authentication for user events
       // For now, we'll show a message about this limitation
@@ -148,22 +137,9 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     } catch (error) {
       return [];
     }
-  };
+  }, []);
 
-  const fetchAllGitHubData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        fetchContributions(),
-        fetchGitHubProfile(),
-        fetchGitHubRepos(),
-        fetchRecentCommits()
-      ]);
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const simulateInstall = async () => {
     setOutput(prev => [
@@ -250,7 +226,7 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     }
   }, [output]);
 
-  const fetchContributions = async () => {
+  const fetchContributions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}`);
@@ -270,7 +246,35 @@ const GitHubContributionsTerminal: React.FC<{ username: string }> = ({ username 
     } finally {
       setLoading(false);
     }
-  };
+  }, [username]);
+
+  const fetchAllGitHubData = useCallback(async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchContributions(),
+        fetchGitHubProfile(),
+        fetchGitHubRepos(),
+        fetchRecentCommits()
+      ]);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchContributions, fetchGitHubProfile, fetchGitHubRepos, fetchRecentCommits]);
+
+  // Auto-refresh GitHub data every 5 minutes if enabled
+  useEffect(() => {
+    if (!autoRefresh || !isInstalled) return;
+
+    const interval = setInterval(async () => {
+      setOutput(prev => [...prev, { type: 'output', text: '🔄 Auto-refreshing GitHub data...' }]);
+      await fetchAllGitHubData();
+      setLastRefresh(new Date());
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, isInstalled, fetchAllGitHubData]);
 
   const renderContributionGrid = (contributions: ContributionDay[]) => {
     // Basic grid display (mimicking the calendar view)

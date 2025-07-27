@@ -46,25 +46,7 @@ function LoginPage() {
     }
   };
 
-  // Example MFA handling (you can add this to your login page if needed)
-  const handleMFAChallenge = async (factorId: string, code: string) => {
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        factorId,
-        code,
-      });
-      
-      if (error) throw error;
-      
-      if (data.session) {
-        showNotification('success', 'Successfully logged in!');
-        router.push('/dashboard');
-      }
-    } catch (error: any) {
-      setError(error.message);
-      showNotification('error', error.message);
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">

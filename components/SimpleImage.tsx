@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface SimpleImageProps {
   src: string;
   alt: string;
@@ -17,14 +19,16 @@ export default function SimpleImage({
   ...rest 
 }: SimpleImageProps) {
   const imgClassName = fill 
-    ? `w-full h-full object-cover ${className}`
+    ? `object-cover ${className}`
     : `${className}`;
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
       className={imgClassName}
+      fill={fill}
+      {...rest}
     />
   );
 } 

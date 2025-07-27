@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { addProject, getCategories, updateProject } from '@/lib/projects';
 import type { Project, Category } from '@/lib/projects';
 import { Button } from './ui/button';
@@ -565,10 +566,11 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                   {form.additionalimages.map((imageUrl: string, index: number) => (
                     <div key={index} className="relative group">
                       <div className="relative w-full h-20 sm:h-24 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                        <img
+                        <Image
                           src={imageUrl}
                           alt={`Additional image ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                       <button
@@ -596,10 +598,11 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             <div className="mt-4">
               <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
               <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                <img
+                <Image
                   src={previewImage}
                   alt="Preview"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-contain"
         />
               </div>
             </div>
