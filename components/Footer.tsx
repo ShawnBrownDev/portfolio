@@ -25,13 +25,7 @@ const Footer = () => {
               <Github className="h-5 w-5" />
               <span className="sr-only">GitHub</span>
             </a>
-            <a
-              href="shawnbrowndevelopment@gmail.com"
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <Mail className="h-5 w-5" />
-              <span className="sr-only">Email</span>
-            </a>
+
           </div>
         </div>
       </div>

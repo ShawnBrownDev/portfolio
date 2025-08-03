@@ -44,6 +44,14 @@ const Hero = () => {
             >
               UpWork
             </a>
+            <a
+              href="https://github.com/ShawnBrownDev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 sm:h-12 items-center justify-center rounded-md border border-input bg-transparent px-4 sm:px-6 py-2 sm:py-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              Github
+            </a>
           </div>
         </div>
 

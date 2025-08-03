@@ -1,282 +1,280 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { Menu, X, Monitor, Moon, Sun, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Monitor, Moon, Sun } from 'lucide-react';
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme, colors } = useTheme();
+
+  // Debug the state
+  useEffect(() => {
+    console.log('isOpen state changed to:', isOpen);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 0);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.classList.add('menu-open');
-    } else {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('menu-open');
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.classList.remove('menu-open');
-    };
-  }, [isOpen]);
-
-  const navLinks = [
-    { href: '#about', label: 'About' },
-    { href: '#projects', label: 'Projects' },
-    { href: '#skills', label: 'Skills' },
-    { href: '#contact', label: 'Contact' },
-  ];
-
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    
-    // Close mobile menu first
     setIsOpen(false);
     
-    // Wait a bit for the menu to close, then scroll
-    setTimeout(() => {
     const element = document.querySelector(href);
-      
     if (element) {
-        // Re-enable body scroll for smooth scrolling
-        document.body.style.overflow = 'unset';
-        document.body.classList.remove('menu-open');
-        
-        element.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    }, 300); // Wait for menu close animation
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
+
+  const navLinks = [
+    { href: '#home', label: 'Home' },
+    { href: '#about', label: 'About' },
+    { href: '#skills', label: 'Skills' },
+    { href: '#projects', label: 'Projects' },
+    { href: '#experience', label: 'Experience' },
+    { href: '#contact', label: 'Contact' }
+  ];
 
   const themes = [
     { value: 'default', label: 'Default', icon: Monitor },
     { value: 'matrix', label: 'Matrix', icon: Moon },
-    { value: 'monokai', label: 'Monokai', icon: Sun },
+    { value: 'monokai', label: 'Monokai', icon: Sun }
   ] as const;
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 w-full z-40 transition-all duration-300 py-4",
-        isScrolled ? `${colors.main.card} backdrop-blur-sm shadow-sm` : "bg-transparent"
-      )}
-    >
-      <div className="container mx-auto flex justify-between items-center px-4 md:px-6">
-        <Link href="/" className={cn("text-2xl font-bold", colors.main.text)}>
-          Shawn Brown
-        </Link>
+    <>
+      <header className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        isScrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg" : "bg-transparent"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <h1 className="text-xl font-bold text-white">SB</h1>
+            </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              className={cn(
-                "text-sm font-medium transition-colors cursor-pointer",
-                colors.main.muted,
-                "hover:" + colors.main.text.split("text-")[1]
-              )}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          {/* Theme Toggle */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className={cn(
-                "flex items-center space-x-2 text-sm font-medium transition-all duration-200 cursor-pointer",
-                colors.main.muted,
-                "hover:" + colors.main.text.split("text-")[1],
-                isOpen ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
-              )}>
-                <Palette size={20} />
-                <span className="hidden sm:inline">Theme</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={cn("w-40 border", colors.main.card, colors.main.border)}>
-              {themes.map(({ value, label, icon: Icon }) => (
-                <DropdownMenuItem
-                  key={value}
-                  onClick={() => setTheme(value)}
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex space-x-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className={cn(
-                    "flex items-center space-x-2 cursor-pointer",
-                    theme === value ? cn(colors.main.text, colors.main.card) : cn(colors.main.muted, colors.main.hover)
+                    "text-sm font-medium transition-colors duration-200 cursor-pointer",
+                    colors.main.text,
+                    "hover:" + colors.main.accent.split("text-")[1]
                   )}
                 >
-                  <Icon size={16} />
-                  <span>{label}</span>
-                </DropdownMenuItem>
+                  {link.label}
+                </a>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </nav>
+            </nav>
 
-        {/* Mobile Navigation Toggle */}
-        <div className="md:hidden flex items-center space-x-4">
-          {/* Mobile Theme Toggle */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className={cn(
-                "transition-colors",
-                colors.main.muted,
-                "hover:" + colors.main.text.split("text-")[1]
-              )}>
-                <Palette size={20} />
+            {/* Desktop Theme Toggle */}
+            <div className="hidden md:flex items-center space-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={cn(
+                    "transition-all duration-200 p-2 rounded-lg",
+                    colors.main.muted,
+                    "hover:" + colors.main.text.split("text-")[1]
+                  )}>
+                    {theme === 'default' && <Monitor size={20} />}
+                    {theme === 'matrix' && <Moon size={20} />}
+                    {theme === 'monokai' && <Sun size={20} />}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {themes.map(({ value, label, icon: Icon }) => (
+                    <DropdownMenuItem
+                      key={value}
+                      onClick={() => setTheme(value)}
+                      className={cn(
+                        "flex items-center space-x-2 cursor-pointer",
+                        theme === value && "bg-blue-500 text-white"
+                      )}
+                    >
+                      <Icon size={16} />
+                      <span>{label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => {
+                  console.log('Button clicked! Current isOpen:', isOpen);
+                  setIsOpen(!isOpen);
+                  console.log('Setting isOpen to:', !isOpen);
+                }}
+                className={cn(
+                  "transition-all duration-200 p-2 rounded-lg",
+                  colors.main.muted,
+                  "hover:" + colors.main.text.split("text-")[1],
+                  isOpen && "bg-white bg-opacity-10"
+                )}
+                aria-label="Toggle mobile menu"
+              >
+                <div className="relative w-6 h-6">
+                  <span className={cn(
+                    "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
+                    isOpen ? "rotate-45" : "-translate-y-1"
+                  )} />
+                  <span className={cn(
+                    "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
+                    isOpen ? "opacity-0" : "opacity-100"
+                  )} />
+                  <span className={cn(
+                    "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
+                    isOpen ? "-rotate-45" : "translate-y-1"
+                  )} />
+                </div>
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className={cn("w-40 border", colors.main.card, colors.main.border)}>
-              {themes.map(({ value, label, icon: Icon }) => (
-                <DropdownMenuItem
-                  key={value}
-                  onClick={() => setTheme(value)}
-                  className={cn(
-                    "flex items-center space-x-2 cursor-pointer",
-                    theme === value ? cn(colors.main.text, colors.main.card) : cn(colors.main.muted, colors.main.hover)
-                  )}
-                >
-                  <Icon size={16} />
-                  <span>{label}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-            className={cn(
-              "transition-all duration-200 p-2 rounded-lg",
-              colors.main.muted,
-              "hover:" + colors.main.text.split("text-")[1],
-              isOpen && "bg-white bg-opacity-10"
-            )}
-        >
-          <div className="relative w-6 h-6">
-            <span className={cn(
-              "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
-              isOpen ? "rotate-45" : "-translate-y-1"
-            )} />
-            <span className={cn(
-              "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
-              isOpen ? "opacity-0" : "opacity-100"
-            )} />
-            <span className={cn(
-              "absolute top-1/2 left-0 w-6 h-0.5 bg-current transform transition-all duration-200",
-              isOpen ? "-rotate-45" : "translate-y-1"
-            )} />
+            </div>
           </div>
-        </button>
         </div>
-      </div>
+      </header>
 
-      {/* Mobile Navigation Menu - Bottom Sheet */}
+      {/* Mobile Menu - Bottom Sheet */}
       <>
-        {/* Backdrop */}
+        {/* Test - Remove all classes and use pure inline styles */}
         <div 
-          className={cn(
-            "fixed inset-0 bg-black bg-opacity-60 z-[60] md:hidden transition-opacity duration-300",
-            isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          )}
           onClick={() => setIsOpen(false)}
+          style={{
+            display: isOpen ? 'block' : 'none',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 9998
+          }}
         />
         
-        {/* Bottom Sheet */}
-        <div className={cn(
-          "mobile-menu-container fixed bottom-0 left-0 right-0 z-[70] md:hidden transform transition-transform duration-300 ease-out",
-          "w-screen h-auto",
-          isOpen ? "translate-y-0" : "translate-y-full"
-        )}>
-            <div className={cn(
-              "rounded-t-3xl shadow-2xl border-t",
-              "bg-gray-900 border-gray-700",
-              "w-full"
-            )}>
-              {/* Handle */}
-              <div className="flex justify-center pt-4 pb-3">
-                <div className="w-16 h-1.5 bg-gray-500 rounded-full opacity-60"></div>
-              </div>
-              
-              {/* Navigation Links */}
-              <div className="px-6 pb-8">
-                <div className="space-y-2">
-                  {navLinks.map((link, index) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className={cn(
-                        "block px-4 py-4 rounded-2xl text-lg font-semibold transition-all duration-200 cursor-pointer",
-                        "text-white hover:text-white",
-                        "bg-gray-800 hover:bg-gray-700 active:scale-98",
-                        "border border-gray-600 hover:border-gray-500",
-                        "shadow-sm hover:shadow-md"
-                      )}
-                      style={{
-                        animationDelay: `${index * 50}ms`
-                      }}
-              >
-                {link.label}
-              </a>
-            ))}
-                </div>
-                
-                {/* Theme Section */}
-                <div className="mt-8 pt-6 border-t border-gray-700">
-                  <h3 className="text-sm font-semibold text-gray-300 mb-4 px-4 uppercase tracking-wide">
-                    Theme
-                  </h3>
-                  <div className="grid grid-cols-3 gap-3">
-                    {themes.map(({ value, label, icon: Icon }) => (
-                      <button
-                        key={value}
-                        onClick={() => {
-                          setTheme(value);
-                          setIsOpen(false);
-                        }}
-                        className={cn(
-                          "flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-200",
-                          "border border-gray-600",
-                          theme === value 
-                            ? "bg-white text-black shadow-lg scale-105" 
-                            : "bg-gray-800 text-white hover:bg-gray-700 hover:scale-102"
-                        )}
-                      >
-                        <Icon size={24} />
-                        <span className="text-xs font-semibold">{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+        {/* Bottom Sheet Menu */}
+        <div 
+          style={{
+            display: isOpen ? 'block' : 'none',
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            backgroundColor: theme === 'matrix' ? '#0d1117' : theme === 'monokai' ? '#272822' : '#ffffff',
+            color: theme === 'matrix' ? '#00ff00' : theme === 'monokai' ? '#f8f8f2' : '#000000',
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            boxShadow: '0 -10px 25px rgba(0,0,0,0.3)',
+            maxHeight: '60vh',
+            overflowY: 'auto',
+            borderTop: theme === 'matrix' ? '1px solid #30363d' : theme === 'monokai' ? '1px solid #49483e' : '1px solid #e5e7eb'
+          }}
+        >
+          {/* Handle */}
+          <div style={{display: 'flex', justifyContent: 'center', paddingTop: '12px', paddingBottom: '8px'}}>
+            <div style={{
+              width: '48px', 
+              height: '4px', 
+              backgroundColor: theme === 'matrix' ? '#6e7681' : theme === 'monokai' ? '#75715e' : '#d1d5db',
+              borderRadius: '2px'
+            }}></div>
+          </div>
+          
+          {/* Navigation Links */}
+          <div style={{padding: '0 24px 16px 24px'}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+              {navLinks.map((link, index) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  style={{
+                    display: 'block',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    backgroundColor: theme === 'matrix' ? '#21262d' : theme === 'monokai' ? '#3e3d32' : '#f9fafb',
+                    color: theme === 'matrix' ? '#c9d1d9' : theme === 'monokai' ? '#f8f8f2' : '#374151',
+                    border: `1px solid ${theme === 'matrix' ? '#30363d' : theme === 'monokai' ? '#49483e' : '#e5e7eb'}`,
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+            
+            {/* Theme Section */}
+            <div style={{
+              marginTop: '16px', 
+              paddingTop: '12px', 
+              borderTop: `1px solid ${theme === 'matrix' ? '#30363d' : theme === 'monokai' ? '#49483e' : '#e5e7eb'}`
+            }}>
+              <h3 style={{
+                fontSize: '12px',
+                fontWeight: '600',
+                color: theme === 'matrix' ? '#8b949e' : theme === 'monokai' ? '#75715e' : '#6b7280',
+                marginBottom: '8px',
+                paddingLeft: '4px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Theme
+              </h3>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px'}}>
+                {themes.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => {
+                      setTheme(value);
+                      setIsOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px',
+                      borderRadius: '12px',
+                      border: `1px solid ${theme === 'matrix' ? '#30363d' : theme === 'monokai' ? '#49483e' : '#e5e7eb'}`,
+                      backgroundColor: theme === value 
+                        ? '#3b82f6' 
+                        : theme === 'matrix' ? '#21262d' : theme === 'monokai' ? '#3e3d32' : '#f9fafb',
+                      color: theme === value 
+                        ? '#ffffff' 
+                        : theme === 'matrix' ? '#c9d1d9' : theme === 'monokai' ? '#f8f8f2' : '#374151',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <Icon size={18} />
+                    <span>{label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-        </>
-    </header>
+        </div>
+      </>
+    </>
   );
 };
 
