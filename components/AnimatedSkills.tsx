@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimation, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useAnimation, useInView, AnimatePresence, easeInOut } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { skills, Skill, Category } from '@/lib/skills';
 
@@ -34,7 +34,7 @@ const AnimatedSkills = () => {
       scale: 0.95,
       transition: {
         duration: 0.3,
-        ease: "easeIn"
+        ease: easeInOut
       }
     },
     visible: {
@@ -43,7 +43,7 @@ const AnimatedSkills = () => {
       scale: 1,
       transition: {
         duration: 0.4,
-        ease: "easeOut"
+        ease: easeInOut
       },
     },
     exit: {
@@ -52,7 +52,7 @@ const AnimatedSkills = () => {
       scale: 0.95,
       transition: {
         duration: 0.3,
-        ease: "easeIn"
+        ease: easeInOut
       }
     }
   };
