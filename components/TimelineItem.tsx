@@ -3,6 +3,7 @@
 import React from 'react';
 import { ExperienceItem } from '@/lib/experience';
 import { motion } from 'framer-motion';
+import { Calendar, Building2, MapPin } from 'lucide-react';
 
 interface TimelineItemProps {
   item: ExperienceItem;
@@ -13,37 +14,59 @@ interface TimelineItemProps {
 const TimelineItem: React.FC<TimelineItemProps> = ({ item, isLast, index }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.3 }}
-      className="relative flex items-start mb-12 last:mb-0"
+      initial={{ opacity: 0, x: -30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.15, duration: 0.5, ease: "easeOut" }}
+      className="relative group"
     >
-      {/* Connector Line */}
-      {!isLast && (
-        <div className="absolute left-2.5 top-3 w-[1px] h-[calc(100%+24px)] bg-blue-500/20" />
-      )}
-
-      {/* Timeline Node */}
-      <div className="relative z-10">
-        <div className="w-5 h-5 rounded-full bg-[#0A0F1E] border border-blue-500/20 flex items-center justify-center">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-500/30" />
-        </div>
+      {/* Professional Timeline Line */}
+      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-600/60 via-slate-600/30 to-transparent" />
+      
+      {/* Professional Timeline Node */}
+      <div className="absolute left-5 top-8 w-3 h-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 border-2 border-slate-900 shadow-lg group-hover:scale-125 transition-all duration-300">
+        <div className="absolute inset-0.5 rounded-full bg-blue-400/30 animate-pulse" />
       </div>
 
-      {/* Content */}
-      <div className="ml-6 flex-1">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base text-white">
-            {item.title}
-          </h3>
-          <span className="text-sm text-slate-200 bg-[#0A0F1E] px-3 py-0.5 rounded-[4px]">
-            {item.period}
-          </span>
-        </div>
-        
-        <span className="block text-sm text-slate-300 mt-1.5">
-          {item.company}
-        </span>
+      {/* Content Container */}
+      <div className="ml-12 mb-10">
+        <motion.div
+          whileHover={{ y: -3, scale: 1.01 }}
+          className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-lg hover:shadow-xl hover:border-blue-600/40 transition-all duration-300"
+        >
+          {/* Professional Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-white mb-2 leading-tight group-hover:text-blue-400 transition-colors">
+                {item.title}
+              </h3>
+              <div className="flex items-center gap-2 text-slate-300 text-sm">
+                <Building2 className="w-4 h-4 text-blue-500" />
+                <span className="font-medium">{item.company}</span>
+              </div>
+            </div>
+            
+            {/* Professional Period Badge */}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-600/20 to-blue-500/20 border border-blue-600/30 rounded-lg px-3 py-1.5 shadow-sm">
+              <Calendar className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-xs font-semibold text-blue-300 tracking-wide">{item.period}</span>
+            </div>
+          </div>
+
+          {/* Professional Description */}
+          {item.description && (
+            <div className="mb-4">
+              <p className="text-slate-300 text-sm leading-relaxed font-light">
+                {item.description}
+              </p>
+            </div>
+          )}
+
+          {/* Professional Hover Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none" />
+          
+          {/* Professional Corner Accent */}
+          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-600/10 to-transparent rounded-xl pointer-events-none" />
+        </motion.div>
       </div>
     </motion.div>
   );
