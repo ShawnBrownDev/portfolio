@@ -6,6 +6,7 @@ export interface Project {
   image: string;
   demourl: string | null;
   githuburl: string | null;
+  videourl: string | null; // YouTube, Vimeo, or direct video URL
   additionalimages: string[] | null;
   challenges: string[] | null;
   solutions: string[] | null;

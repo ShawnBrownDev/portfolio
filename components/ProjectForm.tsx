@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { addProject, getCategories, updateProject } from '@/lib/projects';
-import type { Project, Category } from '@/lib/projects';
+import type { Category } from '@/lib/projects';
+import type { Project } from '@/types/project';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -31,6 +32,7 @@ const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at'> & { selec
     image: '',
     demourl: null,
     githuburl: null,
+    videourl: null,
     challenges: null,
     solutions: null,
     impact: null,
@@ -449,6 +451,21 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
                 className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
         />
             </div>
+          </div>
+
+          {/* Video URL Field */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-white">Video Demo URL</label>
+            <input
+              name="videourl"
+              placeholder="YouTube, Vimeo, Loom, or direct video URL..."
+              value={form.videourl || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Supports YouTube, Vimeo, Loom, or direct video file URLs (.mp4, .webm, .ogg)
+            </p>
           </div>
       </div>
 

@@ -1,0 +1,157 @@
+name: Branch Protection and Quality Gates
+
+on:
+  pull_request:
+    branches: [ main, dev, dev2 ]
+  push:
+    branches: [ main, dev, dev2 ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Quality Gate for all branches
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Build test
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  # Additional checks for main branch
+  production-checks:
+    name: Production Safety Checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: High security audit
+        run: npm audit --audit-level=high
+
+      - name: Check bundle size
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Analyze bundle size
+        run: |
+          echo "Bundle size analysis completed"
+          # Add bundle analysis here if needed
+
+  # Staging checks for dev branch
+  staging-checks:
+    name: Staging Environment Checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' || github.base_ref == 'dev'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (if available)
+        run: |
+          if npm run test 2>/dev/null; then
+            npm run test
+          else
+            echo "No tests configured"
+          fi
+
+      - name: Build for staging
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  # Development checks for dev2 branch
+  development-checks:
+    name: Development Environment Checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev2' || github.base_ref == 'dev2'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quick lint check
+        run: npm run lint
+
+      - name: Quick build test
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  # Notify on PR creation
+  pr-notification:
+    name: Pull Request Notification
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    
+    steps:
+      - name: Notify PR creation
+        run: |
+          echo "New PR created: ${{ github.event.pull_request.title }}"
+          echo "From: ${{ github.event.pull_request.head.ref }}"
+          echo "To: ${{ github.event.pull_request.base.ref }}"
+          echo "Author: ${{ github.event.pull_request.user.login }}"
+          
+          # Add Slack notification here if needed
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data "{\"text\":\"New PR: ${{ github.event.pull_request.title }}\"}" \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }} 

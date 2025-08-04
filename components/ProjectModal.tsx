@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Project } from '../lib/projects';
-import { X, ExternalLink, Github, ChevronLeft, ChevronRight } from 'lucide-react';
+import type { Project } from '@/types/project';
+import { X, ExternalLink, Github, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { Dialog, DialogContent } from './ui/dialog';
+import VideoPlayer from './VideoPlayer';
 
 interface ProjectModalProps {
   project: Project;
@@ -84,6 +85,21 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
             </>
           )}
         </div>
+
+        {/* Video Section */}
+        {project.videourl && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Play size={16} className="text-blue-400" />
+              <h4 className="text-lg font-semibold text-white">Project Demo Video</h4>
+            </div>
+            <VideoPlayer 
+              videoUrl={project.videourl} 
+              title={`${project.title} Demo Video`}
+              className="w-full"
+            />
+          </div>
+        )}
 
         {/* Lightbox Modal */}
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>

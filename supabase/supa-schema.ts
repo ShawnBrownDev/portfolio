@@ -117,6 +117,7 @@ export type Database = {
           tags: string[] | null
           title: string
           user_id: string
+          videourl: string | null
         }
         Insert: {
           additionalimages?: string[] | null
@@ -133,6 +134,7 @@ export type Database = {
           tags?: string[] | null
           title: string
           user_id: string
+          videourl?: string | null
         }
         Update: {
           additionalimages?: string[] | null
@@ -149,6 +151,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           user_id?: string
+          videourl?: string | null
         }
         Relationships: []
       }

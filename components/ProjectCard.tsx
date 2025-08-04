@@ -1,6 +1,7 @@
 "use client";
 
-import { Project, Category } from '@/lib/projects';
+import { Category } from '@/lib/projects';
+import type { Project } from '@/types/project';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';

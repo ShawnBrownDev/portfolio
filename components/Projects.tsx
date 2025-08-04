@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Project, Category, getProjects, getCategories } from '../lib/projects';
+import { Category, getProjects, getCategories } from '../lib/projects';
+import type { Project } from '@/types/project';
 import ProjectCard from './ProjectCard';
 import ProjectModal from './ProjectModal';
 import { motion, AnimatePresence } from 'framer-motion';
