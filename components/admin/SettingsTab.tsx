@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Project } from '@/types/project';
-import { ProjectCard } from './ProjectCard';
+import { ProjectCard } from '@/components/admin/ProjectCard';
 import { useNotification } from '@/contexts/NotificationContext';
 import { toggleProjectPublishedStatus } from '@/lib/projects';
 

@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Project } from '@/types/project';
-import { ProjectCard } from './ProjectCard';
+import { ProjectCard } from '@/components/admin/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { Plus, Globe } from 'lucide-react';
-import ProjectForm from '@/components/ProjectForm';
+import ProjectForm from '@/components/projects/ProjectForm';
 import {
   Dialog,
   DialogContent,
@@ -155,6 +155,7 @@ export function ProjectsTab() {
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-4xl bg-[#1a1a1a] border border-[#333] text-white">
+          <DialogTitle className="sr-only">Add New Project</DialogTitle>
           <ProjectForm
             mode="create"
             onClose={() => setShowAddDialog(false)}
