@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { ArrowDown } from 'lucide-react';
 import Link from 'next/link';
-import GitHubContributionsTerminal from './GitHubContributionsTerminal';
+import GitHubContributionsTerminal from '@/components/github/GitHubContributionsTerminal';
 
 const Hero = () => {
   return (

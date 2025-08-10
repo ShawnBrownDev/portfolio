@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import type { Project } from '@/types/project';
 import { X, ExternalLink, Github, ChevronLeft, ChevronRight, Play } from 'lucide-react';
-import { Dialog, DialogContent } from './ui/dialog';
-import VideoPlayer from './VideoPlayer';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import VideoPlayer from '@/components/projects/VideoPlayer';
 
 interface ProjectModalProps {
   project: Project;
@@ -87,14 +87,14 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         </div>
 
         {/* Video Section */}
-        {project.videourl && (
+        {(project.videourl || project.video_file) && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
               <Play size={16} className="text-blue-400" />
               <h4 className="text-lg font-semibold text-white">Project Demo Video</h4>
             </div>
             <VideoPlayer 
-              videoUrl={project.videourl} 
+              videoUrl={project.video_file || project.videourl!} 
               title={`${project.title} Demo Video`}
               className="w-full"
             />
@@ -104,6 +104,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         {/* Lightbox Modal */}
         <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
           <DialogContent className="flex items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl">
+            <DialogTitle className="sr-only">Full size image preview</DialogTitle>
             <div className="relative max-h-[85vh] max-w-[90vw] rounded-lg overflow-hidden" style={{ background: 'black' }}>
               {allImages[currentImageIndex] && (
                 <Image
@@ -183,6 +184,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
               </div>
               <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
                 <DialogContent className="flex flex-col items-center justify-center bg-black bg-opacity-90 p-2 sm:p-0 max-w-[95vw] sm:max-w-3xl min-h-[60vh]">
+                  <DialogTitle className="sr-only">Project Demo</DialogTitle>
                   {!iframeError ? (
                     <iframe
                       src={project.demourl}

@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import ProjectForm from '@/components/ProjectForm';
+import ProjectForm from '@/components/projects/ProjectForm';
 import {
   Dialog,
   DialogContent,

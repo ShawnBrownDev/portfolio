@@ -2,10 +2,10 @@
 
 import { Category } from '@/lib/projects';
 import type { Project } from '@/types/project';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import SimpleImage from './SimpleImage';
+import SimpleImage from '@/components/common/SimpleImage';
 
 interface ProjectCardProps {
   project: Project & { categories: Category[] };
