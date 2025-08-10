@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NotificationProvider, useNotification } from '@/contexts/NotificationContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -99,12 +100,12 @@ function LoginPage() {
                 Remember me
               </label>
             </div>
-            <a 
-              href="#" 
+            <Link 
+              href="/reset-password" 
               className="text-sm text-primary hover:text-primary/80 transition-colors"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
           {error && (
             <div className="bg-red-500/10 text-red-500 text-sm p-3 rounded-lg">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getExperiences, ExperienceItem } from '@/lib/experience';
-import TimelineItem from './TimelineItemModern';
+import TimelineItem from '@/components/timeline/TimelineItemModern';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AboutMe = () => {

@@ -118,6 +118,7 @@ export type Database = {
           title: string
           user_id: string
           videourl: string | null
+        video_file: string | null
         }
         Insert: {
           additionalimages?: string[] | null

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Category, getProjects, getCategories } from '../lib/projects';
+import { Category, getProjects, getCategories } from '@/lib/projects';
 import type { Project } from '@/types/project';
-import ProjectCard from './ProjectCard';
-import ProjectModal from './ProjectModal';
+import ProjectCard from '@/components/projects/ProjectCard';
+import ProjectModal from '@/components/projects/ProjectModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Projects = () => {

@@ -5,14 +5,14 @@ import Image from 'next/image';
 import { addProject, getCategories, updateProject } from '@/lib/projects';
 import type { Category } from '@/lib/projects';
 import type { Project } from '@/types/project';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useNotification } from '@/contexts/NotificationContext';
 import { Loader2, X, Upload, Image as ImageIcon, Link } from 'lucide-react';
-import { TagInput } from './ui/tag-input';
+import { TagInput } from '@/components/ui/tag-input';
 import { TECHNOLOGY_TAGS } from '@/lib/constants';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { createBrowserClient } from '@supabase/ssr';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 type ProjectFormData = Omit<Project, 'id' | 'user_id' | 'created_at' | 'is_published'> & {
   selectedCategoryIds: string[];
@@ -33,6 +33,7 @@ const initialFormState: Omit<Project, 'id' | 'user_id' | 'created_at'> & { selec
     demourl: null,
     githuburl: null,
     videourl: null,
+    video_file: null,
     challenges: null,
     solutions: null,
     impact: null,
@@ -62,6 +63,9 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
   const [additionalImagesInputMode, setAdditionalImagesInputMode] = useState<'url' | 'upload'>('url');
   const [uploadingAdditionalImages, setUploadingAdditionalImages] = useState(false);
   const additionalImagesFileInputRef = useRef<HTMLInputElement>(null);
+  const [videoFileInputMode, setVideoFileInputMode] = useState<'url' | 'upload'>('url');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
   const { showNotification } = useNotification();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<null | (() => void)>(null);
@@ -244,6 +248,55 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
     }
   };
 
+  const handleVideoFileUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+    if (!allowedTypes.includes(file.type)) {
+      showNotification('error', 'Invalid file type. Only MP4, WebM, and OGG videos are allowed.');
+      return;
+    }
+
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      showNotification('error', 'File too large. Maximum size is 50MB.');
+      return;
+    }
+
+    setUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload video');
+      }
+
+      setForm(prev => ({ ...prev, video_file: data.url }));
+      showNotification('success', 'Video uploaded successfully!');
+    } catch (error: any) {
+      showNotification('error', error.message || 'Failed to upload video');
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
+  const handleVideoFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleVideoFileUpload(file);
+    }
+  };
+
   const validateForm = (): boolean => {
     if (!form.title.trim()) {
       showNotification('error', 'Project title is required');
@@ -322,14 +375,14 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
 
       <div>
             <label className="block text-sm font-medium mb-1 text-white">Description *</label>
-        <textarea
-          name="description"
-              placeholder="Describe your project"
-          value={form.description || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[120px]"
-          required
-        />
+                 <textarea
+           name="description"
+               placeholder="Describe your project"
+           value={form.description ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[120px]"
+           required
+         />
       </div>
 
           {/* Enhanced Image Input */}
@@ -361,14 +414,14 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             </div>
 
             {imageInputMode === 'url' ? (
-        <input
-          name="image"
-              placeholder="Enter image URL"
-          value={form.image || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-          required
-        />
+                 <input
+           name="image"
+               placeholder="Enter image URL"
+           value={form.image ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+           required
+         />
             ) : (
               <div className="space-y-3">
                 <input
@@ -433,75 +486,144 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
               <label className="block text-sm font-medium mb-1 text-white">Demo URL</label>
-        <input
-          name="demourl"
-                placeholder="https://..."
-          value={form.demourl || ''}
-          onChange={handleChange}
-                className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-        />
+                 <input
+           name="demourl"
+                 placeholder="https://..."
+           value={form.demourl ?? ''}
+           onChange={handleChange}
+                 className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+         />
       </div>
       <div>
               <label className="block text-sm font-medium mb-1 text-white">GitHub URL</label>
-        <input
-          name="githuburl"
-                placeholder="https://github.com/..."
-          value={form.githuburl || ''}
-          onChange={handleChange}
-                className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-        />
+                 <input
+           name="githuburl"
+                 placeholder="https://github.com/..."
+           value={form.githuburl ?? ''}
+           onChange={handleChange}
+                 className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+         />
             </div>
           </div>
 
-          {/* Video URL Field */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-white">Video Demo URL</label>
-            <input
-              name="videourl"
-              placeholder="YouTube, Vimeo, Loom, or direct video URL..."
-              value={form.videourl || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Supports YouTube, Vimeo, Loom, or direct video file URLs (.mp4, .webm, .ogg)
-            </p>
-          </div>
+                     {/* Video Field */}
+           <div>
+             <label className="block text-sm font-medium mb-1 text-white">Project Video</label>
+             
+             {/* Input Mode Toggle */}
+             <div className="flex flex-wrap gap-2 mb-3">
+               <Button
+                 type="button"
+                 variant={videoFileInputMode === 'url' ? 'default' : 'outline'}
+                 size="sm"
+                 onClick={() => setVideoFileInputMode('url')}
+                 className="flex items-center gap-2 text-xs sm:text-sm"
+               >
+                 <Link className="h-3 w-3 sm:h-4 sm:w-4" />
+                 URL
+               </Button>
+               <Button
+                 type="button"
+                 variant={videoFileInputMode === 'upload' ? 'default' : 'outline'}
+                 size="sm"
+                 onClick={() => setVideoFileInputMode('upload')}
+                 className="flex items-center gap-2 text-xs sm:text-sm"
+               >
+                 <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+                 Upload
+               </Button>
+             </div>
+
+             {videoFileInputMode === 'url' ? (
+               <div>
+                 <input
+                   name="videourl"
+                   placeholder="YouTube, Vimeo, Loom, or direct video URL..."
+                   value={form.videourl ?? ''}
+                   onChange={handleChange}
+                   className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+                 />
+                 <p className="text-xs text-gray-400 mt-1">
+                   Supports YouTube, Vimeo, Loom, or direct video file URLs (.mp4, .webm, .ogg)
+                 </p>
+               </div>
+             ) : (
+               <div className="space-y-3">
+                 <input
+                   ref={videoFileInputRef}
+                   type="file"
+                   accept="video/*"
+                   onChange={handleVideoFileInputChange}
+                   className="hidden"
+                 />
+                 <div className="border-2 border-dashed border-[#333] rounded-lg p-4 sm:p-6 text-center hover:border-white transition-colors cursor-pointer"
+                      onClick={() => videoFileInputRef.current?.click()}>
+                   {uploadingVideo ? (
+                     <div className="flex items-center justify-center gap-2">
+                       <Loader2 className="h-6 w-6 animate-spin" />
+                       <span className="text-white">Uploading video...</span>
+                     </div>
+                   ) : (
+                     <div className="space-y-2">
+                       <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-gray-400" />
+                       <div className="text-white">
+                         <p className="font-medium text-sm sm:text-base">Click to upload video</p>
+                         <p className="text-xs sm:text-sm text-gray-400">MP4, WebM, OGG up to 50MB</p>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+                 {form.video_file && videoFileInputMode === 'upload' && (
+                   <div className="flex items-center justify-between text-sm text-gray-400 bg-[#1a1a1a] border border-[#333] rounded-lg p-3">
+                     <span>Current video: {form.video_file.split('/').pop()}</span>
+                     <button
+                       type="button"
+                       onClick={() => setForm(prev => ({ ...prev, video_file: null }))}
+                       className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                       title="Delete video"
+                     >
+                       <X className="h-3 w-3" />
+                     </button>
+                   </div>
+                 )}
+               </div>
+             )}
+           </div>
       </div>
 
         {/* Right column - Additional fields and preview */}
         <div className="space-y-4">
       <div>
             <label className="block text-sm font-medium mb-1 text-white">Challenges</label>
-            <textarea
-          name="challenges"
-              placeholder="List the main challenges (comma-separated)"
-          value={form.challenges?.join(', ') || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-        />
+                         <textarea
+           name="challenges"
+               placeholder="List the main challenges (comma-separated)"
+           value={form.challenges?.join(', ') ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
+         />
       </div>
 
       <div>
             <label className="block text-sm font-medium mb-1 text-white">Solutions</label>
-            <textarea
-          name="solutions"
-              placeholder="List your solutions (comma-separated)"
-          value={form.solutions?.join(', ') || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-        />
+                         <textarea
+           name="solutions"
+               placeholder="List your solutions (comma-separated)"
+           value={form.solutions?.join(', ') ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
+         />
       </div>
 
       <div>
             <label className="block text-sm font-medium mb-1 text-white">Project Impact</label>
-        <textarea
-          name="impact"
-              placeholder="Describe the project's impact"
-          value={form.impact || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
-        />
+                 <textarea
+           name="impact"
+               placeholder="Describe the project's impact"
+           value={form.impact ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors min-h-[80px]"
+         />
       </div>
 
       <div>
@@ -532,13 +654,13 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             </div>
 
             {additionalImagesInputMode === 'url' ? (
-        <input
-          name="additionalimages"
-              placeholder="Additional image URLs (comma-separated)"
-          value={form.additionalimages?.join(', ') || ''}
-          onChange={handleChange}
-              className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
-            />
+                 <input
+           name="additionalimages"
+               placeholder="Additional image URLs (comma-separated)"
+           value={form.additionalimages?.join(', ') ?? ''}
+           onChange={handleChange}
+               className="w-full px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-sm focus:outline-none focus:border-white transition-colors"
+             />
             ) : (
               <div className="space-y-3">
                 <input
@@ -610,20 +732,39 @@ export default function ProjectForm({ project, onClose, onSuccess, mode = 'creat
             )}
           </div>
 
-          {/* Image preview */}
-          {previewImage && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
-              <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
-                <Image
-                  src={previewImage}
-                  alt="Preview"
-                  fill
-                  className="object-contain"
-        />
-              </div>
-            </div>
-          )}
+                     {/* Image preview */}
+           {previewImage && (
+             <div className="mt-4">
+               <label className="block text-sm font-medium mb-2 text-white">Image Preview</label>
+               <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
+                 <Image
+                   src={previewImage}
+                   alt="Preview"
+                   fill
+                   className="object-contain"
+         />
+               </div>
+             </div>
+           )}
+
+           {/* Video preview */}
+           {(form.video_file || form.videourl) && (
+             <div className="mt-4">
+               <label className="block text-sm font-medium mb-2 text-white">Video Preview</label>
+               <div className="relative w-full h-40 sm:h-48 rounded-lg overflow-hidden bg-[#1a1a1a] border border-[#333]">
+                 <video
+                   controls
+                   className="w-full h-full object-contain"
+                   preload="metadata"
+                 >
+                   <source src={form.video_file || form.videourl || ''} type="video/mp4" />
+                   <source src={form.video_file || form.videourl || ''} type="video/webm" />
+                   <source src={form.video_file || form.videourl || ''} type="video/ogg" />
+                   Your browser does not support the video tag.
+                 </video>
+               </div>
+             </div>
+           )}
         </div>
       </div>
 
