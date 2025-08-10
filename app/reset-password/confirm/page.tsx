@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { NotificationProvider, useNotification } from '@/contexts/NotificationContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
@@ -17,24 +17,24 @@ function ResetPasswordConfirmPage() {
   const [error, setError] = useState<string | null>(null);
   const [isValidLink, setIsValidLink] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { showNotification } = useNotification();
 
-  // Check if we have a valid reset link
   useEffect(() => {
-    const allParams = Object.fromEntries(searchParams.entries());
-    console.log('URL Parameters:', allParams);
-    
-    // Check for any auth-related parameters
-    const hasAnyParams = Object.keys(allParams).length > 0;
-    
-    if (!hasAnyParams) {
-      setError('Invalid reset link. Please request a new password reset.');
-      return;
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const allParams = Object.fromEntries(urlParams.entries());
+      console.log('URL Parameters:', allParams);
+      
+      const hasAnyParams = Object.keys(allParams).length > 0;
+      
+      if (!hasAnyParams) {
+        setError('Invalid reset link. Please request a new password reset.');
+        return;
+      }
+      
+      setIsValidLink(true);
     }
-    
-    setIsValidLink(true);
-  }, [searchParams]);
+  }, []);
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +53,6 @@ function ResetPasswordConfirmPage() {
     setLoading(true);
 
     try {
-      // Try to update the user's password
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
@@ -146,11 +145,9 @@ function ResetPasswordConfirmPage() {
             Enter your new password below.
           </p>
           
-          {/* Debug info - remove this in production */}
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-4 p-3 bg-gray-800 rounded text-xs text-gray-300">
               <p>Debug Info:</p>
-              <p>URL Params: {JSON.stringify(Object.fromEntries(searchParams.entries()))}</p>
               <p>Valid Link: {isValidLink ? 'Yes' : 'No'}</p>
             </div>
           )}
