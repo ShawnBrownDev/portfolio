@@ -50,13 +50,13 @@ function ResetPasswordPage() {
             </div>
             <h1 className="text-2xl font-semibold text-foreground mb-2">Check your email</h1>
             <p className="text-muted-foreground text-sm">
-              We've sent a password reset link to <strong>{email}</strong>
+              We have sent a password reset link to <strong>{email}</strong>
             </p>
           </div>
           
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Didn't receive the email? Check your spam folder or try again.
+              Didn&apos;t receive the email? Check your spam folder or try again.
             </p>
             <button
               onClick={() => setSent(false)}
@@ -89,7 +89,7 @@ function ResetPasswordPage() {
           </Link>
           <h1 className="text-2xl font-semibold text-foreground mb-2">Reset your password</h1>
           <p className="text-muted-foreground text-sm">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
 
