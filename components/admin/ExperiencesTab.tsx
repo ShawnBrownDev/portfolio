@@ -7,21 +7,48 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { getExperiences, addExperience, updateExperience, deleteExperience, ExperienceItem, ExperienceItemInput } from '@/lib/experience';
 import { useNotification } from '@/contexts/NotificationContext';
+import { supabase } from '@/lib/supabase';
 
 const ExperiencesTab = () => {
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [authStatus, setAuthStatus] = useState<string>('Checking...');
   const { showNotification } = useNotification();
+
+  const checkAuthStatus = useCallback(async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        setAuthStatus('Error: ' + error.message);
+        console.error('Auth error:', error);
+      } else if (user) {
+        setAuthStatus(`Authenticated as: ${user.email}`);
+        console.log('User authenticated:', user.id);
+      } else {
+        setAuthStatus('Not authenticated');
+        console.log('No user authenticated');
+      }
+    } catch (error) {
+      setAuthStatus('Error checking auth');
+      console.error('Error checking auth:', error);
+    }
+  }, []);
 
   const fetchExperiences = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getExperiences();
       setExperiences(data);
-    } catch (error) {
-      showNotification('error', 'Error fetching experiences');
+    } catch (error: any) {
+      console.error('Error fetching experiences:', error);
+      if (error.message === 'User not authenticated') {
+        showNotification('error', 'Please log in to view experiences');
+        setExperiences([]);
+      } else {
+        showNotification('error', error.message || 'Error fetching experiences');
+      }
     } finally {
       setLoading(false);
     }
@@ -36,8 +63,9 @@ const ExperiencesTab = () => {
   });
 
   useEffect(() => {
+    checkAuthStatus();
     fetchExperiences();
-  }, [fetchExperiences]);
+  }, [checkAuthStatus, fetchExperiences]);
 
   const handleAdd = () => {
     setIsAdding(true);
@@ -65,19 +93,44 @@ const ExperiencesTab = () => {
 
   const handleSave = async () => {
     try {
+      console.log('Starting save process...');
+      console.log('Form data:', formData);
+      
+      // Validate required fields
+      if (!formData.title.trim()) {
+        showNotification('error', 'Title is required');
+        return;
+      }
+      if (!formData.company.trim()) {
+        showNotification('error', 'Company is required');
+        return;
+      }
+      if (!formData.period.trim()) {
+        showNotification('error', 'Period is required');
+        return;
+      }
+      
       if (editingId) {
+        console.log('Updating experience with ID:', editingId);
         await updateExperience(editingId, formData);
         showNotification('success', 'Experience updated successfully');
         setEditingId(null);
       } else if (isAdding) {
-        await addExperience(formData);
+        console.log('Adding new experience...');
+        const result = await addExperience(formData);
+        console.log('Add experience result:', result);
         showNotification('success', 'Experience added successfully');
         setIsAdding(false);
       }
       setFormData({ title: '', company: '', period: '', description: '', order_index: 0 });
       fetchExperiences();
-    } catch (error) {
-      showNotification('error', 'Error saving experience');
+    } catch (error: any) {
+      console.error('Error saving experience:', error);
+      if (error.message === 'User not authenticated') {
+        showNotification('error', 'Please log in to add experiences');
+      } else {
+        showNotification('error', error.message || 'Error saving experience');
+      }
     }
   };
 
@@ -97,8 +150,13 @@ const ExperiencesTab = () => {
           setFormData({ title: '', company: '', period: '', description: '', order_index: 0 });
         }
         fetchExperiences();
-      } catch (error) {
-        showNotification('error', 'Error deleting experience');
+      } catch (error: any) {
+        console.error('Error deleting experience:', error);
+        if (error.message === 'User not authenticated') {
+          showNotification('error', 'Please log in to delete experiences');
+        } else {
+          showNotification('error', error.message || 'Error deleting experience');
+        }
       }
     }
   };
@@ -117,12 +175,25 @@ const ExperiencesTab = () => {
         <div>
           <h2 className="text-2xl font-bold text-white">Experience Management</h2>
           <p className="text-gray-400 mt-1">Manage your professional experience timeline</p>
+          <p className="text-sm text-blue-400 mt-1">Status: {authStatus}</p>
         </div>
-        <Button onClick={handleAdd} className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+        <Button 
+          onClick={handleAdd} 
+          disabled={authStatus.startsWith('Not authenticated') || authStatus.startsWith('Error')}
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           <Plus size={16} />
           Add Experience
         </Button>
       </div>
+
+      {authStatus.startsWith('Not authenticated') && (
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+          <p className="text-yellow-400 text-sm">
+            Please log in to add and manage experiences. You need to be authenticated to access this feature.
+          </p>
+        </div>
+      )}
 
       {/* Add New Experience Form */}
       {isAdding && (
@@ -132,7 +203,7 @@ const ExperiencesTab = () => {
             <p className="text-gray-400 text-sm">Fill in the experience details below</p>
           </div>
           
-          <div className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-white">Title</label>
@@ -141,6 +212,7 @@ const ExperiencesTab = () => {
                   onChange={(e) => handleChange('title', e.target.value)}
                   placeholder="e.g., Senior Developer"
                   className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                  required
                 />
               </div>
               <div>
@@ -150,6 +222,7 @@ const ExperiencesTab = () => {
                   onChange={(e) => handleChange('company', e.target.value)}
                   placeholder="e.g., Tech Company"
                   className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                  required
                 />
               </div>
             </div>
@@ -161,6 +234,7 @@ const ExperiencesTab = () => {
                   onChange={(e) => handleChange('period', e.target.value)}
                   placeholder="e.g., 2020-2023"
                   className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                  required
                 />
               </div>
               <div>
@@ -171,6 +245,7 @@ const ExperiencesTab = () => {
                   onChange={(e) => handleChange('order_index', parseInt(e.target.value) || 0)}
                   placeholder="Display order"
                   className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                  required
                 />
               </div>
             </div>
@@ -185,16 +260,16 @@ const ExperiencesTab = () => {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button onClick={handleSave} className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+              <Button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
                 <Save size={16} />
                 Add Experience
               </Button>
-              <Button variant="outline" onClick={handleCancel} className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
+              <Button type="button" variant="outline" onClick={handleCancel} className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
                 <X size={16} />
                 Cancel
               </Button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 
@@ -204,7 +279,7 @@ const ExperiencesTab = () => {
           <div key={experience.id} className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 hover:border-gray-600/50 transition-all duration-200">
             {editingId === experience.id ? (
               // Edit Mode - Inline Form
-              <div className="space-y-4">
+              <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
                 <div className="mb-4">
                   <h3 className="text-xl font-semibold text-white">Edit Experience</h3>
                   <p className="text-gray-400 text-sm">Update the experience details below</p>
@@ -218,6 +293,7 @@ const ExperiencesTab = () => {
                       onChange={(e) => handleChange('title', e.target.value)}
                       placeholder="e.g., Senior Developer"
                       className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                      required
                     />
                   </div>
                   <div>
@@ -227,6 +303,7 @@ const ExperiencesTab = () => {
                       onChange={(e) => handleChange('company', e.target.value)}
                       placeholder="e.g., Tech Company"
                       className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                      required
                     />
                   </div>
                 </div>
@@ -238,6 +315,7 @@ const ExperiencesTab = () => {
                       onChange={(e) => handleChange('period', e.target.value)}
                       placeholder="e.g., 2020-2023"
                       className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                      required
                     />
                   </div>
                   <div>
@@ -248,6 +326,7 @@ const ExperiencesTab = () => {
                       onChange={(e) => handleChange('order_index', parseInt(e.target.value) || 0)}
                       placeholder="Display order"
                       className="bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                      required
                     />
                   </div>
                 </div>
@@ -262,16 +341,16 @@ const ExperiencesTab = () => {
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button onClick={handleSave} className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
+                  <Button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
                     <Save size={16} />
                     Update Experience
                   </Button>
-                  <Button variant="outline" onClick={handleCancel} className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
+                  <Button type="button" variant="outline" onClick={handleCancel} className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-gray-700">
                     <X size={16} />
                     Cancel
                   </Button>
                 </div>
-              </div>
+              </form>
             ) : (
               // View Mode - Display Card
               <div className="flex justify-between items-start">
